@@ -5,6 +5,7 @@ import com.hiekn.china.aeronautical.model.bean.Conference;
 import com.hiekn.china.aeronautical.model.vo.ConferenceQuery;
 import com.hiekn.china.aeronautical.repository.ConferenceRepository;
 import com.hiekn.china.aeronautical.service.ConferenceService;
+import com.hiekn.china.aeronautical.util.DataBeanUtils;
 import com.mongodb.WriteResult;
 import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -23,7 +24,7 @@ public class ConferenceServiceImpl implements ConferenceService {
     @Autowired
     private ConferenceRepository conferenceRepository;
 
-    public RestData<Conference> findAll(ConferenceQuery bean,String collectionName) {
+    public RestData<Conference> findAll(ConferenceQuery bean, String collectionName) {
         Pageable pageable;
         Conference targe = new Conference();
         HashMap map = new HashMap();
@@ -39,6 +40,8 @@ public class ConferenceServiceImpl implements ConferenceService {
                         map.put(key, tempMap.get("value"));
                         orders = keyHasSort((String) key, tempMap, orders);
                         //keyHasMatch((String) key, tempMap, matcher);
+                    } else if (val instanceof List) {
+
                     } else {
                         map.put(key, val);
                     }
@@ -46,9 +49,9 @@ public class ConferenceServiceImpl implements ConferenceService {
             }
         }
         Conference conference = mapToBean(map, targe);
-        if(orders.size() >0) {
+        if (orders.size() > 0) {
             pageable = new PageRequest(bean.getPageNo() - 1, bean.getPageSize(), new Sort(orders));
-        }else {
+        } else {
             pageable = new PageRequest(bean.getPageNo() - 1, bean.getPageSize());
         }
         Example<Conference> example = Example.of(conference);
@@ -56,36 +59,36 @@ public class ConferenceServiceImpl implements ConferenceService {
         return new RestData<>(p.getContent(), p.getTotalElements());
     }
 
-    public Conference findOne(String id,String collectionName) {
+    public Conference findOne(String id, String collectionName) {
         return conferenceRepository.findOne(id, collectionName);
     }
 
     public WriteResult delete(String id, String collectionName) {
-        return conferenceRepository.delete(id,collectionName);
+        return conferenceRepository.delete(id, collectionName);
     }
 
-    public Conference modify(String id, Conference conference,String collectionName) {
-        Conference targe = conferenceRepository.findOne(id,collectionName);
-        BeanUtils.copyProperties(conference, targe);
-        return conferenceRepository.save(targe,collectionName);
+    public Conference modify(String id, Conference conference, String collectionName) {
+        Conference targe = conferenceRepository.findOne(id, collectionName);
+        String[] stringArr = DataBeanUtils.getNullProperty(conference);
+        BeanUtils.copyProperties(conference, targe, stringArr);
+        return conferenceRepository.save(targe, collectionName);
     }
 
-    public Conference add(Conference conference,String collectionName) {
-        return conferenceRepository.insert(conference,collectionName);
+    public Conference add(Conference conference, String collectionName) {
+        return conferenceRepository.insert(conference, collectionName);
     }
 
     public void wordStatistics() {
         conferenceRepository.wordStatistics();
     }
 
-
-    public static <T> T mapToBean(Map<String, Object> map, T bean) {
+    private static <T> T mapToBean(Map<String, Object> map, T bean) {
         BeanMap beanMap = BeanMap.create(bean);
         beanMap.putAll(map);
         return bean;
     }
 
-    public List<Sort.Order> keyHasSort(String key, Map map, List<Sort.Order> orders) {
+    private List<Sort.Order> keyHasSort(String key, Map map, List<Sort.Order> orders) {
         Object order = map.get("sort");
         if (order != null) {
             String o = (String) order;

@@ -62,7 +62,7 @@ public class ConferenceRestApi {
         return new RestResp<>(conferenceService.add(conference, collectionName));
     }
 
-
+    @ApiOperation("统计")
     @POST
     @Path("word")
     public void wordStatistics(){
