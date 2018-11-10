@@ -1,7 +1,8 @@
 package com.hiekn.china.aeronautical.repository;
 
-import com.hiekn.china.aeronautical.model.bean.Conference;
-import com.hiekn.china.aeronautical.repository.custom.mongo.CustomMongoRepository;
+import com.hiekn.china.aeronautical.model.bean.Publisher;
+import com.hiekn.china.aeronautical.repository.custom.PublisherRepositoryCustom;
+import org.springframework.data.mongodb.repository.MongoRepository;
 
-public interface PublisherRepository extends CustomMongoRepository<Conference,String>{
+public interface PublisherRepository extends MongoRepository<Publisher,String>, PublisherRepositoryCustom {
 }

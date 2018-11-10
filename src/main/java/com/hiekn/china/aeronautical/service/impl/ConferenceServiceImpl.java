@@ -5,6 +5,7 @@ import com.hiekn.china.aeronautical.model.bean.Conference;
 import com.hiekn.china.aeronautical.model.vo.ConferenceQuery;
 import com.hiekn.china.aeronautical.repository.ConferenceRepository;
 import com.hiekn.china.aeronautical.service.ConferenceService;
+import com.mongodb.WriteResult;
 import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.cglib.beans.BeanMap;
@@ -51,17 +52,16 @@ public class ConferenceServiceImpl implements ConferenceService {
             pageable = new PageRequest(bean.getPageNo() - 1, bean.getPageSize());
         }
         Example<Conference> example = Example.of(conference);
-        Page<Conference> p = conferenceRepository.findAll(example, pageable,collectionName);
+        Page<Conference> p = conferenceRepository.findAll(example, pageable, collectionName);
         return new RestData<>(p.getContent(), p.getTotalElements());
     }
 
     public Conference findOne(String id,String collectionName) {
-        return conferenceRepository.findOne(id,collectionName);
+        return conferenceRepository.findOne(id, collectionName);
     }
 
-    public boolean delete(String id,String collectionName) {
-        conferenceRepository.delete(id,collectionName);
-        return true;
+    public WriteResult delete(String id, String collectionName) {
+        return conferenceRepository.delete(id,collectionName);
     }
 
     public Conference modify(String id, Conference conference,String collectionName) {
@@ -71,7 +71,11 @@ public class ConferenceServiceImpl implements ConferenceService {
     }
 
     public Conference add(Conference conference,String collectionName) {
-        return conferenceRepository.save(conference,collectionName);
+        return conferenceRepository.insert(conference,collectionName);
+    }
+
+    public void wordStatistics() {
+        conferenceRepository.wordStatistics();
     }
 
 
@@ -94,22 +98,23 @@ public class ConferenceServiceImpl implements ConferenceService {
         return orders;
     }
 
-    private ExampleMatcher keyHasMatch(String key, Map map, ExampleMatcher matcher) {
-        Object match = map.get("match");
-        if (match != null) {
-            String o = (String) match;
-            if (o.equalsIgnoreCase("start")) {
-                matcher.withMatcher(key, ExampleMatcher.GenericPropertyMatcher.of(ExampleMatcher.StringMatcher.STARTING));
-            } else if (o.equalsIgnoreCase("end")){
-                matcher.withMatcher(key, ExampleMatcher.GenericPropertyMatcher.of(ExampleMatcher.StringMatcher.ENDING));
-            } else if (o.equalsIgnoreCase("contains")){
-                matcher.withMatcher(key, ExampleMatcher.GenericPropertyMatcher.of(ExampleMatcher.StringMatcher.CONTAINING));
-            } else if (o.equalsIgnoreCase("exact")){
-                matcher.withMatcher(key, ExampleMatcher.GenericPropertyMatcher.of(ExampleMatcher.StringMatcher.EXACT));
-            } else if (o.equalsIgnoreCase("regex")){
-                matcher.withMatcher(key, ExampleMatcher.GenericPropertyMatcher.of(ExampleMatcher.StringMatcher.REGEX));
-            }
-        }
-        return matcher;
-    }
+
+//    private ExampleMatcher keyHasMatch(String key, Map map, ExampleMatcher matcher) {
+//        Object match = map.get("match");
+//        if (match != null) {
+//            String o = (String) match;
+//            if (o.equalsIgnoreCase("start")) {
+//                matcher.withMatcher(key, ExampleMatcher.GenericPropertyMatcher.of(ExampleMatcher.StringMatcher.STARTING));
+//            } else if (o.equalsIgnoreCase("end")){
+//                matcher.withMatcher(key, ExampleMatcher.GenericPropertyMatcher.of(ExampleMatcher.StringMatcher.ENDING));
+//            } else if (o.equalsIgnoreCase("contains")){
+//                matcher.withMatcher(key, ExampleMatcher.GenericPropertyMatcher.of(ExampleMatcher.StringMatcher.CONTAINING));
+//            } else if (o.equalsIgnoreCase("exact")){
+//                matcher.withMatcher(key, ExampleMatcher.GenericPropertyMatcher.of(ExampleMatcher.StringMatcher.EXACT));
+//            } else if (o.equalsIgnoreCase("regex")){
+//                matcher.withMatcher(key, ExampleMatcher.GenericPropertyMatcher.of(ExampleMatcher.StringMatcher.REGEX));
+//            }
+//        }
+//        return matcher;
+//    }
 }

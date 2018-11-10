@@ -12,11 +12,11 @@ public class PageQuery {
     @DefaultValue("10")
     @ApiModelProperty(example = "10")
     @Min(1)
-    private Integer pageSize;
+    private Integer pageSize = 10;
 
     @DefaultValue("1")
     @ApiModelProperty(example = "1")
     @Min(1)
-    private Integer pageNo;
+    private Integer pageNo = 1;
 
 }

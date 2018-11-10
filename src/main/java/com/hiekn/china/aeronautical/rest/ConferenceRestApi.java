@@ -23,25 +23,27 @@ public class ConferenceRestApi {
     @Autowired
     private ConferenceService conferenceService;
 
+    private String collectionName = "conference";
+
     @ApiOperation("会议列表")
     @POST
     @Path("/list")
     public RestResp<RestData<Conference>> get(@Valid ConferenceQuery conferenceQuery) {
-        return new RestResp<>(conferenceService.findAll(conferenceQuery));
+        return new RestResp<>(conferenceService.findAll(conferenceQuery, collectionName));
     }
 
     @ApiOperation("会议详情")
     @GET
     @Path("{id}")
     public RestResp findOne(@PathParam("id") String id) {
-        return new RestResp<>(conferenceService.findOne(id));
+        return new RestResp<>(conferenceService.findOne(id, collectionName));
     }
 
     @ApiOperation("删除会议")
     @DELETE
     @Path("{id}")
     public RestResp delete(@PathParam("id") String id) {
-        conferenceService.delete(id);
+        conferenceService.delete(id, collectionName);
         return new RestResp<>();
     }
 
@@ -50,13 +52,20 @@ public class ConferenceRestApi {
     @Path("{id}")
     @Consumes(MediaType.APPLICATION_JSON)
     public RestResp<Conference> modify(@PathParam("id") String id, @Valid Conference conference) {
-        return new RestResp<>(conferenceService.modify(id, conference));
+        return new RestResp<>(conferenceService.modify(id, conference, collectionName));
     }
 
     @ApiOperation("新增会议")
     @POST
     @Path("add")
     public RestResp add(@Valid Conference conference) {
-        return new RestResp<>(conferenceService.add(conference));
+        return new RestResp<>(conferenceService.add(conference, collectionName));
+    }
+
+
+    @POST
+    @Path("word")
+    public void wordStatistics(){
+        conferenceService.wordStatistics();
     }
 }
