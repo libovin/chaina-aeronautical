@@ -25,7 +25,7 @@ public class ConferenceServiceImpl implements ConferenceService {
     public RestData<Conference> findAll(ConferenceQuery bean, String collectionName) {
         Pageable pageable;
         Conference targe = new Conference();
-        Map<String,Object> map = QueryUtils.trastation(bean, targe);
+        Map<String, Object> map = QueryUtils.trastation(bean, targe);
         List<Sort.Order> orders = (List<Sort.Order>) map.get("sort");
         if (orders.size() > 0) {
             pageable = new PageRequest(bean.getPageNo() - 1, bean.getPageSize(), new Sort(orders));

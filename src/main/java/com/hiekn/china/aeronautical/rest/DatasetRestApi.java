@@ -3,6 +3,7 @@ package com.hiekn.china.aeronautical.rest;
 import com.hiekn.boot.autoconfigure.base.model.result.RestData;
 import com.hiekn.boot.autoconfigure.base.model.result.RestResp;
 import com.hiekn.china.aeronautical.model.bean.Dataset;
+import com.hiekn.china.aeronautical.model.vo.DatasetQuery;
 import com.hiekn.china.aeronautical.service.DatasetService;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
@@ -23,10 +24,10 @@ public class DatasetRestApi {
     private DatasetService datasetService;
 
     @ApiOperation("数据集列表")
-    @GET
+    @POST
     @Path("list")
-    public RestResp<RestData<Dataset>> findAll() {
-        return new RestResp<>(datasetService.findAll());
+    public RestResp<RestData<Dataset>> findAll(@Valid DatasetQuery datasetQuery) {
+        return new RestResp<>(datasetService.findAll(datasetQuery));
     }
 
     @ApiOperation("数据集详情")

@@ -1,34 +1,35 @@
-package com.hiekn.china.aeronautical.model.bean;
+package com.hiekn.china.aeronautical.model.vo;
 
-import com.hiekn.china.aeronautical.model.base.Base;
+import com.hiekn.china.aeronautical.model.base.PageQuery;
+import io.swagger.annotations.ApiModel;
 import io.swagger.annotations.ApiModelProperty;
-import lombok.Data;
+import lombok.*;
 import org.hibernate.validator.constraints.NotBlank;
-import org.springframework.data.mongodb.core.index.Indexed;
-import org.springframework.data.mongodb.core.mapping.Document;
 
 import javax.validation.constraints.Pattern;
 
 @Data
-@Document
-public class Dataset extends Base {
+@ApiModel
+public class DatasetQuery extends PageQuery {
 
     @ApiModelProperty(example = "conference", value = "数据集类型")
-    @Indexed
     @NotBlank(message = "数据集类型不能为空")
     @Pattern(regexp = "(conference|institution|periodical|publisher|website)",
             message = "数据集类型必须为conference|institution|periodical|publisher|website")
     private String type;
 
     @ApiModelProperty(example = "default", value = "数据集key")
-    @Indexed
+    @NotBlank(message = "key不能为空")
     private String key;
-
-    @ApiModelProperty(hidden = true)
-    @Indexed(unique = true)
-    private String typeKey;
 
     @ApiModelProperty(example = "期刊数据集", value = "数据集名称")
     private String name;
+
+    public DatasetQuery() {
+    }
+
+    protected boolean canEqual(Object other) {
+        return other instanceof DatasetQuery;
+    }
 
 }
