@@ -6,15 +6,13 @@ import com.hiekn.china.aeronautical.model.vo.ConferenceQuery;
 import com.hiekn.china.aeronautical.repository.ConferenceRepository;
 import com.hiekn.china.aeronautical.service.ConferenceService;
 import com.hiekn.china.aeronautical.util.DataBeanUtils;
+import com.hiekn.china.aeronautical.util.QueryUtils;
 import com.mongodb.WriteResult;
 import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.cglib.beans.BeanMap;
 import org.springframework.data.domain.*;
 import org.springframework.stereotype.Service;
 
-import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
@@ -27,34 +25,14 @@ public class ConferenceServiceImpl implements ConferenceService {
     public RestData<Conference> findAll(ConferenceQuery bean, String collectionName) {
         Pageable pageable;
         Conference targe = new Conference();
-        HashMap map = new HashMap();
-        List<Sort.Order> orders = new ArrayList<>();
-        //ExampleMatcher matcher = ExampleMatcher.matching().withIgnoreNullValues();
-        if (bean != null) {
-            BeanMap beanMap = BeanMap.create(bean);
-            for (Object key : beanMap.keySet()) {
-                if (beanMap.get(key) != null) {
-                    Object val = beanMap.get(key);
-                    if (val instanceof Map) {
-                        Map tempMap = (Map) val;
-                        map.put(key, tempMap.get("value"));
-                        orders = keyHasSort((String) key, tempMap, orders);
-                        //keyHasMatch((String) key, tempMap, matcher);
-                    } else if (val instanceof List) {
-
-                    } else {
-                        map.put(key, val);
-                    }
-                }
-            }
-        }
-        Conference conference = mapToBean(map, targe);
+        Map<String,Object> map = QueryUtils.trastation(bean, targe);
+        List<Sort.Order> orders = (List<Sort.Order>) map.get("sort");
         if (orders.size() > 0) {
             pageable = new PageRequest(bean.getPageNo() - 1, bean.getPageSize(), new Sort(orders));
         } else {
             pageable = new PageRequest(bean.getPageNo() - 1, bean.getPageSize());
         }
-        Example<Conference> example = Example.of(conference);
+        Example<Conference> example = Example.of((Conference) map.get("bean"));
         Page<Conference> p = conferenceRepository.findAll(example, pageable, collectionName);
         return new RestData<>(p.getContent(), p.getTotalElements());
     }
@@ -78,46 +56,7 @@ public class ConferenceServiceImpl implements ConferenceService {
         return conferenceRepository.insert(conference, collectionName);
     }
 
-    public void wordStatistics() {
-        conferenceRepository.wordStatistics();
+    public void wordStatistics(String collectionName) {
+        conferenceRepository.wordStatistics(collectionName);
     }
-
-    private static <T> T mapToBean(Map<String, Object> map, T bean) {
-        BeanMap beanMap = BeanMap.create(bean);
-        beanMap.putAll(map);
-        return bean;
-    }
-
-    private List<Sort.Order> keyHasSort(String key, Map map, List<Sort.Order> orders) {
-        Object order = map.get("sort");
-        if (order != null) {
-            String o = (String) order;
-            if (o.equalsIgnoreCase("asc")) {
-                orders.add(new Sort.Order(Sort.Direction.ASC, key));
-            } else if (o.equalsIgnoreCase("desc")) {
-                orders.add(new Sort.Order(Sort.Direction.DESC, key));
-            }
-        }
-        return orders;
-    }
-
-
-//    private ExampleMatcher keyHasMatch(String key, Map map, ExampleMatcher matcher) {
-//        Object match = map.get("match");
-//        if (match != null) {
-//            String o = (String) match;
-//            if (o.equalsIgnoreCase("start")) {
-//                matcher.withMatcher(key, ExampleMatcher.GenericPropertyMatcher.of(ExampleMatcher.StringMatcher.STARTING));
-//            } else if (o.equalsIgnoreCase("end")){
-//                matcher.withMatcher(key, ExampleMatcher.GenericPropertyMatcher.of(ExampleMatcher.StringMatcher.ENDING));
-//            } else if (o.equalsIgnoreCase("contains")){
-//                matcher.withMatcher(key, ExampleMatcher.GenericPropertyMatcher.of(ExampleMatcher.StringMatcher.CONTAINING));
-//            } else if (o.equalsIgnoreCase("exact")){
-//                matcher.withMatcher(key, ExampleMatcher.GenericPropertyMatcher.of(ExampleMatcher.StringMatcher.EXACT));
-//            } else if (o.equalsIgnoreCase("regex")){
-//                matcher.withMatcher(key, ExampleMatcher.GenericPropertyMatcher.of(ExampleMatcher.StringMatcher.REGEX));
-//            }
-//        }
-//        return matcher;
-//    }
 }

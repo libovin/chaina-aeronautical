@@ -12,5 +12,5 @@ public interface BaseRepositoryCustom<T> {
 
     <S extends T> S save(S entity, String collectionName);
 
-    void wordStatistics();
+    void wordStatistics(String collectionName);
 }

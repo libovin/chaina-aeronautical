@@ -43,8 +43,7 @@ public class BaseRepositoryCustomImpl<T> {
         return entity;
     }
 
-    public void wordStatistics() {
-        String collectionName = "conference";
+    public void wordStatistics(String collectionName) {
         String mapFunction = "function() {emit(this.title,1)}";
         String reduceFunction = "function(key,values){return Array.sum(values)}";
         MapReduceResults results = mongoTemplate.mapReduce(collectionName, mapFunction, reduceFunction, Map.class);

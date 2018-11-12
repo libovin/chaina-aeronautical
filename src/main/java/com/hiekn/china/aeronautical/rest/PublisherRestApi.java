@@ -2,9 +2,9 @@ package com.hiekn.china.aeronautical.rest;
 
 import com.hiekn.boot.autoconfigure.base.model.result.RestData;
 import com.hiekn.boot.autoconfigure.base.model.result.RestResp;
-import com.hiekn.china.aeronautical.model.bean.Conference;
-import com.hiekn.china.aeronautical.model.vo.ConferenceQuery;
-import com.hiekn.china.aeronautical.service.ConferenceService;
+import com.hiekn.china.aeronautical.model.bean.Publisher;
+import com.hiekn.china.aeronautical.model.vo.PublisherQuery;
+import com.hiekn.china.aeronautical.service.PublisherService;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -15,62 +15,62 @@ import javax.ws.rs.*;
 import javax.ws.rs.core.MediaType;
 
 @Component
-@Path("conference")
-@Api("会议管理")
+@Path("publisher")
+@Api("出版机构管理")
 @Produces(MediaType.APPLICATION_JSON)
-public class ConferenceRestApi {
+public class PublisherRestApi {
 
     @Autowired
-    private ConferenceService conferenceService;
+    private PublisherService publisherService;
 
-    private String collectionName = "conference";
+    private String collectionName = "publisher";
 
-    @ApiOperation("会议列表")
+    @ApiOperation("出版机构列表")
     @POST
     @Path("{key}/list")
-    public RestResp<RestData<Conference>> findAll(@Valid ConferenceQuery conferenceQuery,
+    public RestResp<RestData<Publisher>> findAll(@Valid PublisherQuery publisherQuery,
                                                   @PathParam("key") @DefaultValue("default") String key) {
-        return new RestResp<>(conferenceService.findAll(conferenceQuery, collectionName + "_" + key));
+        return new RestResp<>(publisherService.findAll(publisherQuery, collectionName + "_" + key));
     }
 
-    @ApiOperation("会议详情")
+    @ApiOperation("出版机构详情")
     @GET
     @Path("{key}/{id}")
     public RestResp findOne(@PathParam("id") String id,
                             @PathParam("key") @DefaultValue("default") String key) {
-        return new RestResp<>(conferenceService.findOne(id, collectionName + "_" + key));
+        return new RestResp<>(publisherService.findOne(id, collectionName + "_" + key));
     }
 
-    @ApiOperation("删除会议")
+    @ApiOperation("删除出版机构")
     @DELETE
     @Path("{key}/{id}")
     public RestResp delete(@PathParam("id") String id, @PathParam("key") @DefaultValue("default") String key) {
-        conferenceService.delete(id, collectionName + "_" + key);
+        publisherService.delete(id, collectionName + "_" + key);
         return new RestResp<>();
     }
 
-    @ApiOperation("修改会议")
+    @ApiOperation("修改出版机构")
     @PUT
     @Path("{key}/{id}")
     @Consumes(MediaType.APPLICATION_JSON)
-    public RestResp<Conference> modify(@PathParam("id") String id,
+    public RestResp<Publisher> modify(@PathParam("id") String id,
                                        @PathParam("key") @DefaultValue("default") String key,
-                                       @Valid Conference conference) {
-        return new RestResp<>(conferenceService.modify(id, conference, collectionName + "_" + key));
+                                       @Valid Publisher publisher) {
+        return new RestResp<>(publisherService.modify(id, publisher, collectionName + "_" + key));
     }
 
-    @ApiOperation("新增会议")
+    @ApiOperation("新增出版机构")
     @POST
     @Path("{key}/add")
-    public RestResp add(@Valid Conference conference,
+    public RestResp add(@Valid Publisher publisher,
                         @PathParam("key") @DefaultValue("default") String key) {
-        return new RestResp<>(conferenceService.add(conference, collectionName + "_" + key));
+        return new RestResp<>(publisherService.add(publisher, collectionName + "_" + key));
     }
 
-    @ApiOperation("会议统计")
+    @ApiOperation("出版机构统计")
     @POST
     @Path("{key}/word")
     public void wordStatistics(@PathParam("key") @DefaultValue("default") String key) {
-        conferenceService.wordStatistics(collectionName + "_" + key);
+        publisherService.wordStatistics(collectionName + "_" + key);
     }
 }

@@ -16,5 +16,5 @@ public interface ConferenceService {
 
     Conference add(Conference conference,String collectionName);
 
-    void wordStatistics();
+    void wordStatistics(String collectionName);
 }
