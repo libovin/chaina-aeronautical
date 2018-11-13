@@ -3,32 +3,49 @@ package com.hiekn.china.aeronautical.model.bean;
 import com.hiekn.china.aeronautical.model.base.Base;
 import io.swagger.annotations.ApiModel;
 import io.swagger.annotations.ApiModelProperty;
-import lombok.*;
+import lombok.Data;
 import org.hibernate.validator.constraints.NotBlank;
 import org.springframework.data.mongodb.core.mapping.Document;
 
-/**
- * 会议
- *
- *
- *
- */
+import javax.xml.bind.annotation.XmlRootElement;
+
 @Data
 @Document
-@ApiModel(value = "会议\n")
+@ApiModel(value = "会议")
+@XmlRootElement
 public class Conference extends Base {
 
-    @NotBlank(message = "会议标题不能为空")
-    @ApiModelProperty(example = "2018年xxx会议", value = "会议名称")
-    private String title;
+    @NotBlank(message = "会议名不能为空")
+    @ApiModelProperty(example = "2018年xxx会议", value = "会议名")
+    private String name;
 
-    @ApiModelProperty(example = "www.baidu.com", value = "网站url")
-    private String url;
+    @ApiModelProperty(value = "次要会名")
+    private String secondaryName;
 
-    @ApiModelProperty(example = "yyy会议", value = "简称")
+    @ApiModelProperty(example = "会议简称", value = "会议简称")
     private String shortName;
 
-    @ApiModelProperty(example = "2018年zzz会议", value = "其他名称")
-    private String otherName;
+    @ApiModelProperty(value = "系列会议名")
+    private String seriesName;
 
+    @ApiModelProperty(value = "会议周期")
+    private String meetingCycle;
+
+    @ApiModelProperty(value = "会议届次")
+    private String meetingSession;
+
+    @ApiModelProperty(value = "会议主题")
+    private String meetingTheme;
+
+    @ApiModelProperty(value = "主办机构")
+    private String organizer;
+
+    @ApiModelProperty(value = "协办机构")
+    private String coOrganizer;
+
+    @ApiModelProperty(value = "会议地址")
+    private String venue;
+
+    @ApiModelProperty(value = "专业分类")
+    private String specialClassified;
 }

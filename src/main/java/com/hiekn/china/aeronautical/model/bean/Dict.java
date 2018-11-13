@@ -13,8 +13,10 @@ public class Dict extends Base {
     /**
      * 表类型
      */
-    private String table;
 
+    private String type;
+
+    private String key;
     /**
      * 字段类型
      */
