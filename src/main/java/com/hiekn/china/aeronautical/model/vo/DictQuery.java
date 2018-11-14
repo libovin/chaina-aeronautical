@@ -8,9 +8,6 @@ import lombok.Data;
 @ApiModel
 public class DictQuery {
 
-    @ApiModelProperty(example = "conference", value = "表类型")
-    private String table;
-
     @ApiModelProperty(example = "会议名称字典", value = "表类型")
     private String name;
 }

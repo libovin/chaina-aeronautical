@@ -38,10 +38,10 @@ public class Conference extends Base {
     @ApiModelProperty(value = "会议主题")
     private String meetingTheme;
 
-    @ApiModelProperty(value = "主办机构")
+    @ApiModelProperty(value = "主办单位")
     private String organizer;
 
-    @ApiModelProperty(value = "协办机构")
+    @ApiModelProperty(value = "协办单位")
     private String coOrganizer;
 
     @ApiModelProperty(value = "会议地址")
@@ -50,7 +50,10 @@ public class Conference extends Base {
     @ApiModelProperty(value = "专业分类")
     private String specialClassified;
 
-    @ApiModelProperty(value = "标错")
-    private Map<String,Boolean> errorTag;
+    @ApiModelProperty(value = "是否有错", hidden = true)
+    private Boolean hasError = false;
+
+    @ApiModelProperty(value = "标错", hidden = true)
+    private Map<String, Boolean> errorTag;
 
 }

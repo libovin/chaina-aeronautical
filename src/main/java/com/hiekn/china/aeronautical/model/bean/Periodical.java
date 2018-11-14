@@ -89,6 +89,9 @@ public class Periodical extends Base {
     @ApiModelProperty(value = "收录情况")
     private String inclusionStatus;
 
-    @ApiModelProperty(value = "标错")
-    private Map<String,Boolean> errorTag;
+    @ApiModelProperty(value = "是否有错", hidden = true)
+    private Boolean hasError = false;
+
+    @ApiModelProperty(value = "标错", hidden = true)
+    private Map<String, Boolean> errorTag;
 }

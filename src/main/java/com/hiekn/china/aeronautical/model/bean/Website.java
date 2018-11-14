@@ -61,7 +61,10 @@ public class Website extends Base {
     @ApiModelProperty(value = "重定向信息")
     private String redirection;
 
-    @ApiModelProperty(value = "标错")
-    private Map<String,Boolean> errorTag;
+    @ApiModelProperty(value = "是否有错", hidden = true)
+    private Boolean hasError = false;
+
+    @ApiModelProperty(value = "标错", hidden = true)
+    private Map<String, Boolean> errorTag;
 
 }

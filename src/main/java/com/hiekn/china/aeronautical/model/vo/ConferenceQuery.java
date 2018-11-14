@@ -10,32 +10,20 @@ import lombok.*;
 public class ConferenceQuery extends PageQuery {
 
     /**
-     * 标题
+     * 会议名称、会议简称、会议届次、主办单位、专业分类
+     *
      */
+
     @ApiModelProperty(example = "会议名称", value = "会议名称",dataType = "Object")
-    private Object title;
+    private String name;
 
-    /**
-     * URL
-     */
-    private Object url;
+    @ApiModelProperty(example = "会议简称", value = "会议简称")
+    private String shortName;
 
-    /**
-     * 简称
-     */
-    private Object shortName;
+    @ApiModelProperty(value = "会议届次")
+    private String meetingSession;
 
-    /**
-     * 其他名称
-     */
-    private Object otherName;
-
-    public ConferenceQuery() {
-    }
-
-
-    protected boolean canEqual(Object other) {
-        return other instanceof ConferenceQuery;
-    }
+    @ApiModelProperty(value = "专业分类")
+    private String specialClassified;
 
 }

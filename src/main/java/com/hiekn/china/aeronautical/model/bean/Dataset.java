@@ -8,9 +8,11 @@ import org.springframework.data.mongodb.core.index.Indexed;
 import org.springframework.data.mongodb.core.mapping.Document;
 
 import javax.validation.constraints.Pattern;
+import javax.xml.bind.annotation.XmlRootElement;
 
 @Data
 @Document
+@XmlRootElement
 public class Dataset extends Base {
 
     @ApiModelProperty(example = "conference", value = "数据集类型")
@@ -18,7 +20,7 @@ public class Dataset extends Base {
     @NotBlank(message = "数据集类型不能为空")
     @Pattern(regexp = "(conference|institution|periodical|publisher|website)",
             message = "数据集类型必须为conference|institution|periodical|publisher|website")
-    private String type;
+    private String table;
 
     @ApiModelProperty(example = "default", value = "数据集key")
     @Indexed

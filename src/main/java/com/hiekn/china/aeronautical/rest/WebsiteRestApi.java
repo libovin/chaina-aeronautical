@@ -10,9 +10,15 @@ import io.swagger.annotations.ApiOperation;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
+import javax.activation.MimetypesFileTypeMap;
 import javax.validation.Valid;
 import javax.ws.rs.*;
 import javax.ws.rs.core.MediaType;
+import javax.ws.rs.core.Response;
+import java.io.File;
+import java.io.IOException;
+import java.util.List;
+import java.util.Map;
 
 @Component
 @Path("website")
@@ -72,5 +78,39 @@ public class WebsiteRestApi {
     @Path("{key}/word")
     public void wordStatistics(@PathParam("key") @DefaultValue("default") String key) {
         websiteService.wordStatistics(collectionName + "_" + key);
+    }
+
+    @ApiOperation("导出数据集")
+    @POST
+    @Path("{key}/export")
+    @Produces(MediaType.APPLICATION_OCTET_STREAM)
+    public Response export(@PathParam("key") @DefaultValue("default") String key) {
+
+        File dir = new File("custom/hangzhou_jw");
+        if (!dir.exists()) {
+            dir.mkdirs();
+        }
+        File export = new File(dir.getAbsolutePath() + "/export.doc"); //默认在项目根目录下
+        if (!export.exists()) {
+            try {
+                export.createNewFile();
+            } catch (IOException e) {
+                System.out.println("创建文件失败");
+            }
+        }
+
+        String mt = new MimetypesFileTypeMap().getContentType(export);
+        return Response
+                .ok(export, mt)
+                .header("Content-disposition", "attachment;filename=x.doc")
+                .header("Cache-Control", "no-cache").build();
+    }
+
+    @ApiOperation("数据集检测结果统计")
+    @POST
+    @Path("{key}/check/stat")
+    public RestResp<List<Map<String, Object>>> checkStat(@PathParam("key") @DefaultValue("default") String key) {
+        List<Map<String, Object>> statDetailList = websiteService.checkStat(key);
+        return new RestResp<>(statDetailList);
     }
 }

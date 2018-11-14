@@ -1,10 +1,14 @@
 package com.hiekn.china.aeronautical.model.bean;
 
 import com.hiekn.china.aeronautical.model.base.Base;
+import io.swagger.annotations.ApiModel;
 import io.swagger.annotations.ApiModelProperty;
 import lombok.Data;
+import org.hibernate.validator.constraints.NotBlank;
 import org.springframework.data.mongodb.core.mapping.Document;
 
+import javax.validation.constraints.Pattern;
+import javax.xml.bind.annotation.XmlRootElement;
 import java.util.Set;
 
 /**
@@ -12,10 +16,20 @@ import java.util.Set;
  */
 @Data
 @Document
+@XmlRootElement
 public class Dict extends Base {
 
-    @ApiModelProperty(example = "conference", value = "表类型")
+    @NotBlank(message = "数据集类型不能为空")
+    @Pattern(regexp = "(conference|institution|periodical|publisher|website)",
+            message = "数据集类型必须为conference|institution|periodical|publisher|website")
+    @ApiModelProperty(example = "conference", value = "数据集类型")
     private String table;
+
+    @ApiModelProperty(example = "default", value = "数据集key")
+    private String key;
+
+    @ApiModelProperty(example = "name", value = "列")
+    private String column;
 
     @ApiModelProperty(example = "会议名称字典", value = "字典名称")
     private String name;
