@@ -1,8 +1,11 @@
 package com.hiekn.china.aeronautical.model.bean;
 
 import com.hiekn.china.aeronautical.model.base.Base;
+import io.swagger.annotations.ApiModelProperty;
 import lombok.Data;
 import org.springframework.data.mongodb.core.mapping.Document;
+
+import java.util.Set;
 
 /**
  * 字典
@@ -10,25 +13,13 @@ import org.springframework.data.mongodb.core.mapping.Document;
 @Data
 @Document
 public class Dict extends Base {
-    /**
-     * 表类型
-     */
 
-    private String type;
+    @ApiModelProperty(example = "conference", value = "表类型")
+    private String table;
 
-    private String key;
-    /**
-     * 字段类型
-     */
-    private String column;
-
-    /**
-     * 字典名称
-     */
+    @ApiModelProperty(example = "会议名称字典", value = "字典名称")
     private String name;
 
-    /**
-     * 文本
-     */
-    private String text;
+    @ApiModelProperty(value = "字典内容")
+    private Set<String> text;
 }

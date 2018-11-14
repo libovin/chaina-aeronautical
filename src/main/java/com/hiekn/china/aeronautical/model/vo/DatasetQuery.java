@@ -25,11 +25,4 @@ public class DatasetQuery extends PageQuery {
     @ApiModelProperty(example = "期刊数据集", value = "数据集名称")
     private String name;
 
-    public DatasetQuery() {
-    }
-
-    protected boolean canEqual(Object other) {
-        return other instanceof DatasetQuery;
-    }
-
 }

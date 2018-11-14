@@ -6,6 +6,7 @@ import lombok.Data;
 import org.springframework.data.mongodb.core.mapping.Document;
 
 import javax.xml.bind.annotation.XmlRootElement;
+import java.util.Map;
 
 /**
  * 研究机构
@@ -80,4 +81,7 @@ public class Institution extends Base {
 
     @ApiModelProperty(value = "出版物")
     private String publication;
+
+    @ApiModelProperty(value = "标错")
+    private Map<String,Boolean> errorTag;
 }

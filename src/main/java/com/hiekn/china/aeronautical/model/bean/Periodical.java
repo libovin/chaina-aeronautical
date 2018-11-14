@@ -8,6 +8,7 @@ import org.hibernate.validator.constraints.NotBlank;
 import org.springframework.data.mongodb.core.mapping.Document;
 
 import javax.xml.bind.annotation.XmlRootElement;
+import java.util.Map;
 
 /**
  * 期刊
@@ -87,4 +88,7 @@ public class Periodical extends Base {
 
     @ApiModelProperty(value = "收录情况")
     private String inclusionStatus;
+
+    @ApiModelProperty(value = "标错")
+    private Map<String,Boolean> errorTag;
 }

@@ -7,17 +7,28 @@ import com.hiekn.china.aeronautical.model.vo.ConferenceQuery;
 import com.hiekn.china.aeronautical.service.ConferenceService;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
+import io.swagger.annotations.ApiParam;
+import org.glassfish.jersey.media.multipart.FormDataBodyPart;
+import org.glassfish.jersey.media.multipart.FormDataContentDisposition;
+import org.glassfish.jersey.media.multipart.FormDataParam;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 import javax.validation.Valid;
 import javax.ws.rs.*;
 import javax.ws.rs.core.MediaType;
+import javax.ws.rs.core.Response;
+import javax.ws.rs.core.StreamingOutput;
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.OutputStream;
+import java.util.List;
+import java.util.Map;
 
 @Component
 @Path("conference")
 @Api("会议管理")
-@Produces(MediaType.APPLICATION_JSON)
+@Produces(MediaType.APPLICATION_JSON + ";charset=UTF-8")
 public class ConferenceRestApi {
 
     @Autowired
@@ -67,10 +78,49 @@ public class ConferenceRestApi {
         return new RestResp<>(conferenceService.add(conference, collectionName + "_" + key));
     }
 
-    @ApiOperation("会议统计")
+    @ApiOperation("会议词频统计")
     @POST
     @Path("{key}/word")
     public void wordStatistics(@PathParam("key") @DefaultValue("default") String key) {
         conferenceService.wordStatistics(collectionName + "_" + key);
     }
+
+    @ApiOperation("导入数据集")
+    @POST
+    @Path("{key}/import")
+    @Consumes(MediaType.MULTIPART_FORM_DATA)
+    public RestResp<Map<String, Object>> importData(@PathParam("key") @DefaultValue("default") String key,
+                                                    @ApiParam(value = "file") @FormDataParam("filename") FormDataContentDisposition fileInfo,
+                                                    @ApiParam(value = "file") @FormDataParam("filename") FormDataBodyPart formDataBodyPart,
+                                                    @ApiParam(value = "file") @FormDataParam("filename") InputStream fileIn) {
+        Map<String, Object> map = conferenceService.importData(fileInfo, fileIn, formDataBodyPart);
+        return new RestResp<>(map);
+    }
+
+    @ApiOperation("导出数据集")
+    @POST
+    @Path("{key}/export")
+    @Produces(MediaType.APPLICATION_OCTET_STREAM)
+    public Response export(@PathParam("key") @DefaultValue("default") String key) {
+        StreamingOutput stream = new StreamingOutput() {
+            @Override
+            public void write(OutputStream output) throws IOException, WebApplicationException {
+
+                //output.write();
+            }
+        };
+        return Response
+                .ok(stream)
+                .header("Content-disposition", "attachment;filename=x.doc")
+                .header("Cache-Control", "no-cache").build();
+    }
+
+    @ApiOperation("数据集检测结果统计")
+    @POST
+    @Path("{key}/check/stat")
+    public RestResp<List<Map<String, Object>>> checkStat(@PathParam("key") @DefaultValue("default") String key) {
+        List<Map<String, Object>> statDetailList = conferenceService.checkStat(key);
+        return new RestResp<>(statDetailList);
+    }
+
 }

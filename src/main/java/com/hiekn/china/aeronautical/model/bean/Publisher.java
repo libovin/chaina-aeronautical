@@ -6,6 +6,7 @@ import lombok.Data;
 import org.springframework.data.mongodb.core.mapping.Document;
 
 import javax.xml.bind.annotation.XmlRootElement;
+import java.util.Map;
 
 /**
  * 出版机构
@@ -47,5 +48,8 @@ public class Publisher extends Base {
 
     @ApiModelProperty(value = "简介")
     private String introduction;
+
+    @ApiModelProperty(value = "标错")
+    private Map<String,Boolean> errorTag;
 
 }

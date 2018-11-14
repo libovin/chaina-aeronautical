@@ -8,6 +8,7 @@ import org.hibernate.validator.constraints.NotBlank;
 import org.springframework.data.mongodb.core.mapping.Document;
 
 import javax.xml.bind.annotation.XmlRootElement;
+import java.util.Map;
 
 @Data
 @Document
@@ -48,4 +49,8 @@ public class Conference extends Base {
 
     @ApiModelProperty(value = "专业分类")
     private String specialClassified;
+
+    @ApiModelProperty(value = "标错")
+    private Map<String,Boolean> errorTag;
+
 }

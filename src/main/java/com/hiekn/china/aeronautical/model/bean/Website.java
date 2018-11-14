@@ -6,6 +6,7 @@ import lombok.Data;
 import org.springframework.data.mongodb.core.mapping.Document;
 
 import javax.xml.bind.annotation.XmlRootElement;
+import java.util.Map;
 
 /**
  * 网站
@@ -59,4 +60,8 @@ public class Website extends Base {
 
     @ApiModelProperty(value = "重定向信息")
     private String redirection;
+
+    @ApiModelProperty(value = "标错")
+    private Map<String,Boolean> errorTag;
+
 }

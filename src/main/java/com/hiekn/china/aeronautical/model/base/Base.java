@@ -8,7 +8,7 @@ import org.springframework.data.annotation.LastModifiedDate;
 import org.springframework.data.annotation.Version;
 
 @Data
-public class Base {
+public abstract class Base {
     @Id
     @ApiModelProperty(value = "id",hidden = true)
     private String id;
