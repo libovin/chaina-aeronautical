@@ -5,6 +5,7 @@ import com.hiekn.boot.autoconfigure.base.model.result.RestData;
 import com.hiekn.china.aeronautical.exception.ErrorCodes;
 import com.hiekn.china.aeronautical.model.bean.Website;
 import com.hiekn.china.aeronautical.model.vo.WebsiteQuery;
+import com.hiekn.china.aeronautical.model.vo.WordStatQuery;
 import com.hiekn.china.aeronautical.repository.WebsiteRepository;
 import com.hiekn.china.aeronautical.service.WebsiteService;
 import com.hiekn.china.aeronautical.util.DataBeanUtils;
@@ -66,8 +67,8 @@ public class WebsiteServiceImpl implements WebsiteService {
         return websiteRepository.insert(website, collectionName);
     }
 
-    public void wordStatistics(String collectionName) {
-        websiteRepository.wordStatistics(collectionName);
+    public RestData<Website> wordStatistics(WordStatQuery wordStatQuery,String collectionName) {
+       return websiteRepository.wordStatistics(wordStatQuery,collectionName);
     }
 
     public Map<String, Object> importData(FormDataContentDisposition fileInfo, InputStream fileIn, FormDataBodyPart formDataBodyPart) {

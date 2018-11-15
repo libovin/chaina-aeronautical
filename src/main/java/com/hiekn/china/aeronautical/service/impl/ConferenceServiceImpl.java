@@ -5,6 +5,7 @@ import com.hiekn.boot.autoconfigure.base.model.result.RestData;
 import com.hiekn.china.aeronautical.exception.ErrorCodes;
 import com.hiekn.china.aeronautical.model.bean.Conference;
 import com.hiekn.china.aeronautical.model.vo.ConferenceQuery;
+import com.hiekn.china.aeronautical.model.vo.WordStatQuery;
 import com.hiekn.china.aeronautical.repository.ConferenceRepository;
 import com.hiekn.china.aeronautical.service.ConferenceService;
 import com.hiekn.china.aeronautical.util.DataBeanUtils;
@@ -66,8 +67,8 @@ public class ConferenceServiceImpl implements ConferenceService {
         return conferenceRepository.insert(conference, collectionName);
     }
 
-    public void wordStatistics(String collectionName) {
-        conferenceRepository.wordStatistics(collectionName);
+    public RestData<Conference> wordStatistics(WordStatQuery wordStatQuery,String collectionName) {
+       return conferenceRepository.wordStatistics(wordStatQuery,collectionName);
     }
 
     public Map<String, Object> importData(FormDataContentDisposition fileInfo, InputStream fileIn,FormDataBodyPart formDataBodyPart) {

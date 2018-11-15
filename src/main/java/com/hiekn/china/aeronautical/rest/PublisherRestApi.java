@@ -4,6 +4,7 @@ import com.hiekn.boot.autoconfigure.base.model.result.RestData;
 import com.hiekn.boot.autoconfigure.base.model.result.RestResp;
 import com.hiekn.china.aeronautical.model.bean.Publisher;
 import com.hiekn.china.aeronautical.model.vo.PublisherQuery;
+import com.hiekn.china.aeronautical.model.vo.WordStatQuery;
 import com.hiekn.china.aeronautical.service.PublisherService;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
@@ -73,11 +74,12 @@ public class PublisherRestApi {
         return new RestResp<>(publisherService.add(publisher, collectionName + "_" + key));
     }
 
-    @ApiOperation("出版机构统计")
+    @ApiOperation("出版机构词频统计")
     @POST
     @Path("{key}/word")
-    public void wordStatistics(@PathParam("key") @DefaultValue("default") String key) {
-        publisherService.wordStatistics(collectionName + "_" + key);
+    public RestResp<RestData<Publisher>> wordStatistics(@Valid WordStatQuery wordStatQuery,
+                               @PathParam("key") @DefaultValue("default") String key) {
+        return new RestResp<>(publisherService.wordStatistics(wordStatQuery,collectionName + "_" + key));
     }
 
     @ApiOperation("导出数据集")

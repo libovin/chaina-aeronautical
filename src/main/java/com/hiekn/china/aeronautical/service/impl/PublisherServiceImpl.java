@@ -5,6 +5,7 @@ import com.hiekn.boot.autoconfigure.base.model.result.RestData;
 import com.hiekn.china.aeronautical.exception.ErrorCodes;
 import com.hiekn.china.aeronautical.model.bean.Publisher;
 import com.hiekn.china.aeronautical.model.vo.PublisherQuery;
+import com.hiekn.china.aeronautical.model.vo.WordStatQuery;
 import com.hiekn.china.aeronautical.repository.PublisherRepository;
 import com.hiekn.china.aeronautical.service.PublisherService;
 import com.hiekn.china.aeronautical.util.DataBeanUtils;
@@ -30,14 +31,13 @@ import java.util.Map;
 public class PublisherServiceImpl implements PublisherService {
 
 
-
     @Autowired
     private PublisherRepository publisherRepository;
 
     public RestData<Publisher> findAll(PublisherQuery bean, String collectionName) {
         Pageable pageable;
         Publisher targe = new Publisher();
-        Map<String,Object> map = QueryUtils.trastation(bean, targe);
+        Map<String, Object> map = QueryUtils.trastation(bean, targe);
         List<Sort.Order> orders = (List<Sort.Order>) map.get("sort");
         if (orders.size() > 0) {
             pageable = new PageRequest(bean.getPageNo() - 1, bean.getPageSize(), new Sort(orders));
@@ -68,16 +68,16 @@ public class PublisherServiceImpl implements PublisherService {
         return publisherRepository.insert(publisher, collectionName);
     }
 
-    public void wordStatistics(String collectionName) {
-        publisherRepository.wordStatistics(collectionName);
+    public RestData<Publisher> wordStatistics(WordStatQuery wordStatQuery, String collectionName) {
+        return publisherRepository.wordStatistics(wordStatQuery, collectionName);
     }
 
     public Map<String, Object> importData(FormDataContentDisposition fileInfo, InputStream fileIn, FormDataBodyPart formDataBodyPart) {
         MediaType type = formDataBodyPart.getMediaType();
         String name = null;
         try {
-            name = new String(fileInfo.getFileName().getBytes("iso8859-1"),"utf-8");
-        }catch (Exception e) {
+            name = new String(fileInfo.getFileName().getBytes("iso8859-1"), "utf-8");
+        } catch (Exception e) {
 
         }
         if (name == null) {
@@ -95,12 +95,12 @@ public class PublisherServiceImpl implements PublisherService {
         } else {
             throw ServiceException.newInstance(ErrorCodes.UPLAD_FILE_ERROR);
         }
-        Map<String, Object> map=new HashMap<>();
-        map.put("data",dataList);
+        Map<String, Object> map = new HashMap<>();
+        map.put("data", dataList);
         return map;
     }
 
-    public List<Map<String, Object>> checkStat(String key){
+    public List<Map<String, Object>> checkStat(String key) {
 
         return null;
     }

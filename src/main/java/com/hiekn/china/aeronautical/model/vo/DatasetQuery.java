@@ -16,10 +16,9 @@ public class DatasetQuery extends PageQuery {
     @NotBlank(message = "数据集类型不能为空")
     @Pattern(regexp = "(conference|institution|periodical|publisher|website)",
             message = "数据集类型必须为conference|institution|periodical|publisher|website")
-    private String type;
+    private String table;
 
     @ApiModelProperty(example = "default", value = "数据集key")
-    @NotBlank(message = "key不能为空")
     private String key;
 
     @ApiModelProperty(example = "期刊数据集", value = "数据集名称")

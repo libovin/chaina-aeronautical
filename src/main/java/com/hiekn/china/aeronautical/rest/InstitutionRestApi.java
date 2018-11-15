@@ -4,6 +4,7 @@ import com.hiekn.boot.autoconfigure.base.model.result.RestData;
 import com.hiekn.boot.autoconfigure.base.model.result.RestResp;
 import com.hiekn.china.aeronautical.model.bean.Institution;
 import com.hiekn.china.aeronautical.model.vo.InstitutionQuery;
+import com.hiekn.china.aeronautical.model.vo.WordStatQuery;
 import com.hiekn.china.aeronautical.service.InstitutionService;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
@@ -78,11 +79,12 @@ public class InstitutionRestApi {
         return new RestResp<>(institutionService.add(institution, collectionName + "_" + key));
     }
 
-    @ApiOperation("研究机构统计")
+    @ApiOperation("研究机构词频统计")
     @POST
     @Path("{key}/word")
-    public void wordStatistics(@PathParam("key") @DefaultValue("default") String key) {
-        institutionService.wordStatistics(collectionName + "_" + key);
+    public RestResp<RestData<Institution>>  wordStatistics(@Valid WordStatQuery wordStatQuery,
+                               @PathParam("key") @DefaultValue("default") String key) {
+       return new RestResp<>(institutionService.wordStatistics(wordStatQuery,collectionName + "_" + key));
     }
 
     @ApiOperation("导入数据集")

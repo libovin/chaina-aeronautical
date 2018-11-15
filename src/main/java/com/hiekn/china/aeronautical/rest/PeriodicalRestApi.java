@@ -4,6 +4,7 @@ import com.hiekn.boot.autoconfigure.base.model.result.RestData;
 import com.hiekn.boot.autoconfigure.base.model.result.RestResp;
 import com.hiekn.china.aeronautical.model.bean.Periodical;
 import com.hiekn.china.aeronautical.model.vo.PeriodicalQuery;
+import com.hiekn.china.aeronautical.model.vo.WordStatQuery;
 import com.hiekn.china.aeronautical.service.PeriodicalService;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
@@ -73,11 +74,12 @@ public class PeriodicalRestApi {
         return new RestResp<>(periodicalService.add(periodical, collectionName + "_" + key));
     }
 
-    @ApiOperation("期刊统计")
+    @ApiOperation("期刊词频统计")
     @POST
     @Path("{key}/word")
-    public void wordStatistics(@PathParam("key") @DefaultValue("default") String key) {
-        periodicalService.wordStatistics(collectionName + "_" + key);
+    public RestResp<RestData<Periodical>> wordStatistics(@Valid WordStatQuery wordStatQuery,
+                               @PathParam("key") @DefaultValue("default") String key) {
+        return new RestResp<>(periodicalService.wordStatistics(wordStatQuery,collectionName + "_" + key));
     }
 
     @ApiOperation("导出数据集")

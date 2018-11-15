@@ -4,6 +4,7 @@ import com.hiekn.boot.autoconfigure.base.model.result.RestData;
 import com.hiekn.boot.autoconfigure.base.model.result.RestResp;
 import com.hiekn.china.aeronautical.model.bean.Website;
 import com.hiekn.china.aeronautical.model.vo.WebsiteQuery;
+import com.hiekn.china.aeronautical.model.vo.WordStatQuery;
 import com.hiekn.china.aeronautical.service.WebsiteService;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
@@ -73,11 +74,12 @@ public class WebsiteRestApi {
         return new RestResp<>(websiteService.add(website, collectionName + "_" + key));
     }
 
-    @ApiOperation("网站统计")
+    @ApiOperation("网站词频统计")
     @POST
     @Path("{key}/word")
-    public void wordStatistics(@PathParam("key") @DefaultValue("default") String key) {
-        websiteService.wordStatistics(collectionName + "_" + key);
+    public RestResp<RestData<Website>> wordStatistics(@Valid WordStatQuery wordStatQuery,
+                               @PathParam("key") @DefaultValue("default") String key) {
+        return new RestResp<>(websiteService.wordStatistics(wordStatQuery,collectionName + "_" + key));
     }
 
     @ApiOperation("导出数据集")

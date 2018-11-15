@@ -4,6 +4,7 @@ import com.hiekn.boot.autoconfigure.base.model.result.RestData;
 import com.hiekn.boot.autoconfigure.base.model.result.RestResp;
 import com.hiekn.china.aeronautical.model.bean.Conference;
 import com.hiekn.china.aeronautical.model.vo.ConferenceQuery;
+import com.hiekn.china.aeronautical.model.vo.WordStatQuery;
 import com.hiekn.china.aeronautical.service.ConferenceService;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
@@ -81,8 +82,9 @@ public class ConferenceRestApi {
     @ApiOperation("会议词频统计")
     @POST
     @Path("{key}/word")
-    public void wordStatistics(@PathParam("key") @DefaultValue("default") String key) {
-        conferenceService.wordStatistics(collectionName + "_" + key);
+    public RestResp<RestData<Conference>> wordStatistics(@Valid WordStatQuery wordStatQuery,
+                               @PathParam("key") @DefaultValue("default") String key) {
+        return new RestResp<>(conferenceService.wordStatistics(wordStatQuery,collectionName + "_" + key));
     }
 
     @ApiOperation("导入数据集")

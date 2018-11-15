@@ -5,6 +5,7 @@ import com.hiekn.boot.autoconfigure.base.model.result.RestData;
 import com.hiekn.china.aeronautical.exception.ErrorCodes;
 import com.hiekn.china.aeronautical.model.bean.Institution;
 import com.hiekn.china.aeronautical.model.vo.InstitutionQuery;
+import com.hiekn.china.aeronautical.model.vo.WordStatQuery;
 import com.hiekn.china.aeronautical.repository.InstitutionRepository;
 import com.hiekn.china.aeronautical.service.InstitutionService;
 import com.hiekn.china.aeronautical.util.DataBeanUtils;
@@ -66,8 +67,8 @@ public class InstitutionServiceImpl implements InstitutionService {
         return institutionRepository.insert(institution, collectionName);
     }
 
-    public void wordStatistics(String collectionName) {
-        institutionRepository.wordStatistics(collectionName);
+    public RestData<Institution> wordStatistics(WordStatQuery wordStatQuery,String collectionName) {
+       return institutionRepository.wordStatistics(wordStatQuery,collectionName);
     }
 
     public Map<String, Object> importData(FormDataContentDisposition fileInfo, InputStream fileIn, FormDataBodyPart formDataBodyPart) {
