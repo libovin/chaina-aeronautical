@@ -42,7 +42,7 @@ public class WebsiteRestApi {
     @ApiOperation("网站详情")
     @GET
     @Path("{key}/{id}")
-    public RestResp findOne(@PathParam("id") String id,
+    public RestResp<Website> findOne(@PathParam("id") String id,
                             @PathParam("key") @DefaultValue("default") String key) {
         return new RestResp<>(websiteService.findOne(id, collectionName + "_" + key));
     }
@@ -68,7 +68,7 @@ public class WebsiteRestApi {
     @ApiOperation("新增网站")
     @POST
     @Path("{key}/add")
-    public RestResp add(@Valid Website website,
+    public RestResp<Website> add(@Valid Website website,
                         @PathParam("key") @DefaultValue("default") String key) {
         return new RestResp<>(websiteService.add(website, collectionName + "_" + key));
     }

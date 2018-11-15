@@ -42,7 +42,7 @@ public class PublisherRestApi {
     @ApiOperation("出版机构详情")
     @GET
     @Path("{key}/{id}")
-    public RestResp findOne(@PathParam("id") String id,
+    public RestResp<Publisher> findOne(@PathParam("id") String id,
                             @PathParam("key") @DefaultValue("default") String key) {
         return new RestResp<>(publisherService.findOne(id, collectionName + "_" + key));
     }
@@ -68,7 +68,7 @@ public class PublisherRestApi {
     @ApiOperation("新增出版机构")
     @POST
     @Path("{key}/add")
-    public RestResp add(@Valid Publisher publisher,
+    public RestResp<Publisher> add(@Valid Publisher publisher,
                         @PathParam("key") @DefaultValue("default") String key) {
         return new RestResp<>(publisherService.add(publisher, collectionName + "_" + key));
     }

@@ -1,7 +1,6 @@
 package com.hiekn.china.aeronautical.service.impl;
 
 import com.hiekn.boot.autoconfigure.base.model.result.RestData;
-import com.hiekn.china.aeronautical.model.bean.Dataset;
 import com.hiekn.china.aeronautical.model.bean.Dict;
 import com.hiekn.china.aeronautical.model.vo.DictQuery;
 import com.hiekn.china.aeronautical.repository.DictRepository;
@@ -23,7 +22,7 @@ public class DictServiceImpl implements DictService {
 
     @Override
     public RestData<Dict> findAll(DictQuery bean) {
-        Dataset targe = new Dataset();
+        Dict targe = new Dict();
         Map<String, Object> map = QueryUtils.trastation(bean, targe);
         Example<Dict> example = Example.of((Dict) map.get("bean"));
         return new RestData<>(dictRepository.findAll(example), dictRepository.count(example));

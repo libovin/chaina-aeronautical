@@ -42,7 +42,7 @@ public class PeriodicalRestApi {
     @ApiOperation("期刊详情")
     @GET
     @Path("{key}/{id}")
-    public RestResp findOne(@PathParam("id") String id,
+    public RestResp<Periodical> findOne(@PathParam("id") String id,
                             @PathParam("key") @DefaultValue("default") String key) {
         return new RestResp<>(periodicalService.findOne(id, collectionName + "_" + key));
     }
@@ -68,7 +68,7 @@ public class PeriodicalRestApi {
     @ApiOperation("新增期刊")
     @POST
     @Path("{key}/add")
-    public RestResp add(@Valid Periodical periodical,
+    public RestResp<Periodical> add(@Valid Periodical periodical,
                         @PathParam("key") @DefaultValue("default") String key) {
         return new RestResp<>(periodicalService.add(periodical, collectionName + "_" + key));
     }

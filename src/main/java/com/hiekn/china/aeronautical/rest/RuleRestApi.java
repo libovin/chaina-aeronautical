@@ -3,6 +3,7 @@ package com.hiekn.china.aeronautical.rest;
 import com.hiekn.boot.autoconfigure.base.model.result.RestData;
 import com.hiekn.boot.autoconfigure.base.model.result.RestResp;
 import com.hiekn.china.aeronautical.model.bean.Rule;
+import com.hiekn.china.aeronautical.model.vo.CheckRule;
 import com.hiekn.china.aeronautical.model.vo.RuleQuery;
 import com.hiekn.china.aeronautical.service.RuleService;
 import io.swagger.annotations.Api;
@@ -13,6 +14,7 @@ import org.springframework.stereotype.Component;
 import javax.validation.Valid;
 import javax.ws.rs.*;
 import javax.ws.rs.core.MediaType;
+import java.util.Map;
 
 
 @Component
@@ -34,7 +36,7 @@ public class RuleRestApi {
     @ApiOperation("规则详情")
     @GET
     @Path("{id}")
-    public RestResp findOne(@PathParam("id") String id) {
+    public RestResp<Rule> findOne(@PathParam("id") String id) {
         return new RestResp<>(ruleService.findOne(id));
     }
 
@@ -57,8 +59,15 @@ public class RuleRestApi {
     @ApiOperation("新增规则")
     @POST
     @Path("add")
-    public RestResp add(@Valid Rule rule) {
+    public RestResp<Rule> add(@Valid Rule rule) {
         return new RestResp<>(ruleService.add(rule));
+    }
+
+    @ApiOperation("规则校验")
+    @POST
+    @Path("check")
+    public RestResp<Map> check(@Valid CheckRule checkRule){
+        return new RestResp<>(ruleService.check(checkRule));
     }
 
 }

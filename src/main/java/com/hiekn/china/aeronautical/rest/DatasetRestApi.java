@@ -33,7 +33,7 @@ public class DatasetRestApi {
     @ApiOperation("数据集详情")
     @GET
     @Path("{id}")
-    public RestResp findOne(@PathParam("id") String id) {
+    public RestResp<Dataset> findOne(@PathParam("id") String id) {
         return new RestResp<>(datasetService.findOne(id));
     }
 
@@ -56,7 +56,7 @@ public class DatasetRestApi {
     @ApiOperation("新增数据集")
     @POST
     @Path("add")
-    public RestResp add(@Valid Dataset dataset) {
+    public RestResp<Dataset> add(@Valid Dataset dataset) {
         return new RestResp<>(datasetService.add(dataset));
     }
 

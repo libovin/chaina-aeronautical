@@ -47,7 +47,7 @@ public class ConferenceRestApi {
     @ApiOperation("会议详情")
     @GET
     @Path("{key}/{id}")
-    public RestResp findOne(@PathParam("id") String id,
+    public RestResp<Conference> findOne(@PathParam("id") String id,
                             @PathParam("key") @DefaultValue("default") String key) {
         return new RestResp<>(conferenceService.findOne(id, collectionName + "_" + key));
     }
@@ -73,7 +73,7 @@ public class ConferenceRestApi {
     @ApiOperation("新增会议")
     @POST
     @Path("{key}/add")
-    public RestResp add(@Valid Conference conference,
+    public RestResp<Conference> add(@Valid Conference conference,
                         @PathParam("key") @DefaultValue("default") String key) {
         return new RestResp<>(conferenceService.add(conference, collectionName + "_" + key));
     }

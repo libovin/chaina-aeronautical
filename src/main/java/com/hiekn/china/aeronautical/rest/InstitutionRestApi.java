@@ -47,7 +47,7 @@ public class InstitutionRestApi {
     @ApiOperation("研究机构详情")
     @GET
     @Path("{key}/{id}")
-    public RestResp findOne(@PathParam("id") String id,
+    public RestResp<Institution> findOne(@PathParam("id") String id,
                             @PathParam("key") @DefaultValue("default") String key) {
         return new RestResp<>(institutionService.findOne(id, collectionName + "_" + key));
     }
@@ -73,7 +73,7 @@ public class InstitutionRestApi {
     @ApiOperation("新增研究机构")
     @POST
     @Path("{key}/add")
-    public RestResp add(@Valid Institution institution,
+    public RestResp<Institution> add(@Valid Institution institution,
                         @PathParam("key") @DefaultValue("default") String key) {
         return new RestResp<>(institutionService.add(institution, collectionName + "_" + key));
     }

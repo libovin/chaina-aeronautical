@@ -48,7 +48,7 @@ public class DatasetServiceImpl implements DatasetService {
 
     @Override
     public Dataset add(Dataset dataset) {
-        dataset.setTypeKey(dataset.getType() + dataset.getKey());
+        dataset.setTypeKey(dataset.getTable() + dataset.getKey());
         return datasetRepository.save(dataset);
     }
 

@@ -33,10 +33,31 @@ public class DictRestApi {
     @ApiOperation("字典详情")
     @GET
     @Path("{id}")
-    public RestResp findOne(@PathParam("id") String id) {
+    public RestResp<Dict> findOne(@PathParam("id") String id) {
         return new RestResp<>(dictService.findOne(id));
     }
 
+    @ApiOperation("删除字典")
+    @DELETE
+    @Path("{id}")
+    public RestResp delete(@PathParam("id") String id) {
+        dictService.delete(id);
+        return new RestResp<>();
+    }
 
+    @ApiOperation("修改字典")
+    @PUT
+    @Path("{id}")
+    @Consumes(MediaType.APPLICATION_JSON)
+    public RestResp<Dict> modify(@PathParam("id") String id, @Valid Dict dict) {
+        return new RestResp<>(dictService.modify(id, dict));
+    }
+
+    @ApiOperation("新增字典")
+    @POST
+    @Path("add")
+    public RestResp<Dict> add(@Valid Dict dict) {
+        return new RestResp<>(dictService.add(dict));
+    }
 
 }

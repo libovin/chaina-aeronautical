@@ -1,6 +1,6 @@
 #!/bin/sh
 
-APP_NAME=chaina-aeronautical.jar
+APP_NAME=china-aeronautical.jar
 
 tpid=$(ps aux | grep $APP_NAME | grep -v 'grep' | awk '{print $2}')
 if [ ${tpid} ]; then
