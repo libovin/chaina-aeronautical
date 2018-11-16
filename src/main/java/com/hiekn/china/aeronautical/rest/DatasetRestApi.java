@@ -6,20 +6,17 @@ import com.hiekn.china.aeronautical.model.bean.Dataset;
 import com.hiekn.china.aeronautical.model.vo.DatasetQuery;
 import com.hiekn.china.aeronautical.model.vo.DatesetFile;
 import com.hiekn.china.aeronautical.service.DatasetService;
-import com.monitorjbl.xlsx.StreamingReader;
-import com.monitorjbl.xlsx.impl.StreamingSheet;
-import com.monitorjbl.xlsx.impl.StreamingWorkbook;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
 import lombok.extern.java.Log;
-import org.apache.poi.ss.usermodel.Sheet;
+import org.apache.commons.io.FileUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 import javax.validation.Valid;
 import javax.ws.rs.*;
 import javax.ws.rs.core.MediaType;
-import java.util.Iterator;
+import java.io.File;
 
 @Component
 @Path("dataset")
@@ -66,26 +63,30 @@ public class DatasetRestApi {
     @Path("add")
     @Consumes(MediaType.MULTIPART_FORM_DATA)
     public RestResp<Dataset> add(@BeanParam DatesetFile datesetFile) throws Exception {
-//        File file = new File("s" + System.currentTimeMillis());
-//        FileUtils.copyInputStreamToFile(datesetFile.getFileIn(), file);
+        File file = new File("s" + System.currentTimeMillis());
+        FileUtils.copyInputStreamToFile(datesetFile.getFileIn(), file);
+        file.delete();
 //        InputStream is = new FileInputStream(file);
 //        StreamingReader reader = StreamingReader.builder()
 //                .rowCacheSize(100)    // number of rows to keep in memory (defaults to 10)
 //                .bufferSize(4096)     // buffer size to use when reading InputStream to file (defaults to 1024)
 //                .sheetIndex(0)        // index of sheet to use (defaults to 0)
 //                .open(datesetFile.getFileIn());            // InputStream or File for XLSX file (required)
-        StreamingWorkbook workbook =(StreamingWorkbook) StreamingReader.builder().rowCacheSize(100).bufferSize(4096).open(datesetFile.getFileIn());
-
-        Iterator<Sheet> sheets= workbook.sheetIterator();
-        while (sheets.hasNext()){
-            StreamingSheet sheet =(StreamingSheet) sheets.next();
-            sheet.getPhysicalNumberOfRows();
-
-        }
-
-//        for (Row r : reader) {
-//            for (Cell c : r) {
-//                System.out.println(c.getStringCellValue());
+//        StreamingWorkbook workbook = (StreamingWorkbook) StreamingReader.builder()
+//                .rowCacheSize(100)
+//                .bufferSize(4096)
+//                .open(datesetFile.getFileIn());
+//
+//        StreamingSheet reader = (StreamingSheet) workbook.getSheetAt(0);
+//        System.out.println(reader.getLastRowNum());
+//        Iterator rowIterator = reader.rowIterator();
+//        while (rowIterator.hasNext()) {
+//            StreamingRow row = (StreamingRow) rowIterator.next();
+//            Iterator cellIterator = row.cellIterator();
+//            while (cellIterator.hasNext()) {
+//                StreamingCell cell = (StreamingCell) cellIterator.next();
+//                System.out.print(cell.getRowIndex() + "  " + cell.getColumnIndex() + " --- ");
+//                System.out.println(cell.getStringCellValue());
 //            }
 //        }
 //
