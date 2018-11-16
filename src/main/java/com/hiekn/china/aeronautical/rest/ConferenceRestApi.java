@@ -57,7 +57,7 @@ public class ConferenceRestApi {
     @DELETE
     @Path("{key}/{id}")
     public RestResp delete(@PathParam("id") String id, @PathParam("key") @DefaultValue("default") String key) {
-        conferenceService.delete(id, collectionName + "_" + key);
+        //conferenceService.delete(id, collectionName + "_" + key);
         return new RestResp<>();
     }
 

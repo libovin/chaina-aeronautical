@@ -44,7 +44,7 @@ public class RuleRestApi {
     @DELETE
     @Path("{id}")
     public RestResp delete(@PathParam("id") String id) {
-        ruleService.delete(id);
+        //ruleService.delete(id);
         return new RestResp<>();
     }
 
