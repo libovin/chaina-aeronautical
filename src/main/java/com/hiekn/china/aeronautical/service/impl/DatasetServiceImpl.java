@@ -1,6 +1,8 @@
 package com.hiekn.china.aeronautical.service.impl;
 
+import com.hiekn.boot.autoconfigure.base.exception.RestException;
 import com.hiekn.boot.autoconfigure.base.model.result.RestData;
+import com.hiekn.china.aeronautical.exception.ErrorCodes;
 import com.hiekn.china.aeronautical.model.bean.Conference;
 import com.hiekn.china.aeronautical.model.bean.Dataset;
 import com.hiekn.china.aeronautical.model.vo.DatasetFile;
@@ -64,6 +66,9 @@ public class DatasetServiceImpl implements DatasetService {
         dataset.setKey(datesetFile.getKey());
         dataset.setTypeKey(datesetFile.getTable() +"_"+ datesetFile.getKey());
         dataset.setName(datesetFile.getName());
+        if (datasetRepository.existsDatasetByTypeKey(dataset.getTypeKey())){
+            throw RestException.newInstance(ErrorCodes.NAME_EXIST_ERROR);
+        }
         Dataset dataset1 = datasetRepository.save(dataset);
         if(datesetFile.getFileInfo()!= null) {
             File file = new File("temp" + System.currentTimeMillis());
@@ -85,6 +90,7 @@ public class DatasetServiceImpl implements DatasetService {
         }
         return dataset1;
     }
+
 
 
 }

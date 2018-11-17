@@ -11,13 +11,14 @@ import io.swagger.annotations.ApiOperation;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
-import javax.activation.MimetypesFileTypeMap;
 import javax.validation.Valid;
 import javax.ws.rs.*;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
-import java.io.File;
+import javax.ws.rs.core.StreamingOutput;
 import java.io.IOException;
+import java.nio.file.Files;
+import java.nio.file.Paths;
 import java.util.List;
 import java.util.Map;
 
@@ -83,29 +84,46 @@ public class PeriodicalRestApi {
     }
 
     @ApiOperation("导出数据集")
-    @POST
+    @GET
     @Path("{key}/export")
     @Produces(MediaType.APPLICATION_OCTET_STREAM)
     public Response export(@PathParam("key") @DefaultValue("default") String key){
 
-        File dir = new File("custom/hangzhou_jw");
-        if(!dir.exists()){
-            dir.mkdirs();
-        }
-        File export = new File(dir.getAbsolutePath() + "/export.doc"); //默认在项目根目录下
-        if(!export.exists()){
-            try{
-                export.createNewFile();
-            }catch(IOException e){
-                System.out.println("创建文件失败");
+//        File dir = new File("custom/hangzhou_jw");
+//        if(!dir.exists()){
+//            dir.mkdirs();
+//        }
+//        File export = new File(dir.getAbsolutePath() + "/export.doc"); //默认在项目根目录下
+//        if(!export.exists()){
+//            try{
+//                export.createNewFile();
+//            }catch(IOException e){
+//                System.out.println("创建文件失败");
+//            }
+//        }
+//
+//        String mt = new MimetypesFileTypeMap().getContentType(export);
+//        return Response
+//                .ok(export, mt)
+//                .header("Content-disposition","attachment;filename=x.doc")
+//                .header("Cache-Control", "no-cache").build();
+        StreamingOutput fileStream = new StreamingOutput() {
+            @Override
+            public void write(java.io.OutputStream output) throws IOException, WebApplicationException {
+                try {
+                    java.nio.file.Path path = Paths.get("D:/tinydata.xlsx");
+                    byte[] data = Files.readAllBytes(path);
+                    output.write(data);
+                    output.flush();
+                } catch (Exception e) {
+                    throw new WebApplicationException("File Not Found !!");
+                }
             }
-        }
-
-        String mt = new MimetypesFileTypeMap().getContentType(export);
+        };
         return Response
-                .ok(export, mt)
-                .header("Content-disposition","attachment;filename=x.doc")
-                .header("Cache-Control", "no-cache").build();
+                .ok(fileStream, MediaType.APPLICATION_OCTET_STREAM)
+                .header("content-disposition", "attachment; filename = tinydata.xlsx")
+                .build();
     }
 
     @ApiOperation("数据集检测结果统计")

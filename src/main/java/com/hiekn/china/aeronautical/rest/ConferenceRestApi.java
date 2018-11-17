@@ -22,7 +22,8 @@ import javax.ws.rs.core.Response;
 import javax.ws.rs.core.StreamingOutput;
 import java.io.IOException;
 import java.io.InputStream;
-import java.io.OutputStream;
+import java.nio.file.Files;
+import java.nio.file.Paths;
 import java.util.List;
 import java.util.Map;
 
@@ -49,7 +50,7 @@ public class ConferenceRestApi {
     @GET
     @Path("{key}/{id}")
     public RestResp<Conference> findOne(@PathParam("id") String id,
-                            @PathParam("key") @DefaultValue("default") String key) {
+                                        @PathParam("key") @DefaultValue("default") String key) {
         return new RestResp<>(conferenceService.findOne(id, collectionName + "_" + key));
     }
 
@@ -75,7 +76,7 @@ public class ConferenceRestApi {
     @POST
     @Path("{key}/add")
     public RestResp<Conference> add(@Valid Conference conference,
-                        @PathParam("key") @DefaultValue("default") String key) {
+                                    @PathParam("key") @DefaultValue("default") String key) {
         return new RestResp<>(conferenceService.add(conference, collectionName + "_" + key));
     }
 
@@ -83,8 +84,8 @@ public class ConferenceRestApi {
     @POST
     @Path("{key}/word")
     public RestResp<RestData<Conference>> wordStatistics(@Valid WordStatQuery wordStatQuery,
-                               @PathParam("key") @DefaultValue("default") String key) {
-        return new RestResp<>(conferenceService.wordStatistics(wordStatQuery,collectionName + "_" + key));
+                                                         @PathParam("key") @DefaultValue("default") String key) {
+        return new RestResp<>(conferenceService.wordStatistics(wordStatQuery, collectionName + "_" + key));
     }
 
     @ApiOperation("导入数据集")
@@ -100,21 +101,27 @@ public class ConferenceRestApi {
     }
 
     @ApiOperation("导出数据集")
-    @POST
+    @GET
     @Path("{key}/export")
     @Produces(MediaType.APPLICATION_OCTET_STREAM)
     public Response export(@PathParam("key") @DefaultValue("default") String key) {
-        StreamingOutput stream = new StreamingOutput() {
+        StreamingOutput fileStream = new StreamingOutput() {
             @Override
-            public void write(OutputStream output) throws IOException, WebApplicationException {
-
-                //output.write();
+            public void write(java.io.OutputStream output) throws IOException, WebApplicationException {
+                try {
+                    java.nio.file.Path path = Paths.get("D:/tinydata.xlsx");
+                    byte[] data = Files.readAllBytes(path);
+                    output.write(data);
+                    output.flush();
+                } catch (Exception e) {
+                    throw new WebApplicationException("File Not Found !!");
+                }
             }
         };
         return Response
-                .ok(stream)
-                .header("Content-disposition", "attachment;filename=x.doc")
-                .header("Cache-Control", "no-cache").build();
+                .ok(fileStream, MediaType.APPLICATION_OCTET_STREAM)
+                .header("content-disposition", "attachment; filename = tinydata.xlsx")
+                .build();
     }
 
     @ApiOperation("数据集检测结果统计")
