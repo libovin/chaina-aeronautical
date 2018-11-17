@@ -3,6 +3,7 @@ package com.hiekn.china.aeronautical.rest;
 import com.hiekn.boot.autoconfigure.base.model.result.RestData;
 import com.hiekn.boot.autoconfigure.base.model.result.RestResp;
 import com.hiekn.china.aeronautical.model.bean.Periodical;
+import com.hiekn.china.aeronautical.model.vo.FileImport;
 import com.hiekn.china.aeronautical.model.vo.PeriodicalQuery;
 import com.hiekn.china.aeronautical.model.vo.WordStatQuery;
 import com.hiekn.china.aeronautical.service.PeriodicalService;
@@ -81,6 +82,17 @@ public class PeriodicalRestApi {
     public RestResp<RestData<Periodical>> wordStatistics(@Valid WordStatQuery wordStatQuery,
                                @PathParam("key") @DefaultValue("default") String key) {
         return new RestResp<>(periodicalService.wordStatistics(wordStatQuery,collectionName + "_" + key));
+    }
+
+    @ApiOperation("导入数据集")
+    @POST
+    @Path("{key}/import")
+    @Consumes(MediaType.MULTIPART_FORM_DATA)
+    public RestResp<Map<String, Object>> importData(
+            @BeanParam FileImport fileImport,
+            @PathParam("key") @DefaultValue("default") String key) {
+        Map<String, Object> map = periodicalService.importData(fileImport,collectionName + "_" + key);
+        return new RestResp<>(map);
     }
 
     @ApiOperation("导出数据集")

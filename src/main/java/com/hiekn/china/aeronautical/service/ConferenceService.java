@@ -3,12 +3,10 @@ package com.hiekn.china.aeronautical.service;
 import com.hiekn.boot.autoconfigure.base.model.result.RestData;
 import com.hiekn.china.aeronautical.model.bean.Conference;
 import com.hiekn.china.aeronautical.model.vo.ConferenceQuery;
+import com.hiekn.china.aeronautical.model.vo.FileImport;
 import com.hiekn.china.aeronautical.model.vo.WordStatQuery;
 import com.mongodb.WriteResult;
-import org.glassfish.jersey.media.multipart.FormDataBodyPart;
-import org.glassfish.jersey.media.multipart.FormDataContentDisposition;
 
-import java.io.InputStream;
 import java.util.List;
 import java.util.Map;
 
@@ -25,7 +23,7 @@ public interface ConferenceService {
 
     RestData<Conference> wordStatistics(WordStatQuery wordStatQuery, String collectionName);
 
-    Map<String, Object> importData(FormDataContentDisposition fileInfo, InputStream fileIn, FormDataBodyPart formDataBodyPart);
+    Map<String, Object> importData(FileImport fileImport, String collectionName);
 
     List<Map<String, Object>> checkStat(String key);
 }

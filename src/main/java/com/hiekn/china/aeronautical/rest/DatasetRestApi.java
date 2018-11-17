@@ -3,9 +3,8 @@ package com.hiekn.china.aeronautical.rest;
 import com.hiekn.boot.autoconfigure.base.model.result.RestData;
 import com.hiekn.boot.autoconfigure.base.model.result.RestResp;
 import com.hiekn.china.aeronautical.model.bean.Dataset;
-import com.hiekn.china.aeronautical.model.vo.DatasetQuery;
 import com.hiekn.china.aeronautical.model.vo.DatasetFile;
-import com.hiekn.china.aeronautical.service.ConferenceService;
+import com.hiekn.china.aeronautical.model.vo.DatasetQuery;
 import com.hiekn.china.aeronautical.service.DatasetService;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
@@ -26,9 +25,6 @@ public class DatasetRestApi {
 
     @Autowired
     private DatasetService datasetService;
-
-    @Autowired
-    private ConferenceService conferenceService;
 
     @ApiOperation("数据集列表")
     @POST

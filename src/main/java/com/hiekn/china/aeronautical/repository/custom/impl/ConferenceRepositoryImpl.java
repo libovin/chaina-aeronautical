@@ -11,6 +11,7 @@ import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.mongodb.core.MongoTemplate;
 import org.springframework.data.mongodb.core.query.Query;
+import org.springframework.data.util.CloseableIterator;
 import org.springframework.util.Assert;
 
 import java.math.BigDecimal;
@@ -40,14 +41,19 @@ public class ConferenceRepositoryImpl extends BaseRepositoryCustomImpl<Conferenc
 
     public RestData<Conference> wordStatistics(WordStatQuery wordStatQuery, String collectionName) {
         List<Result> results = getAggResult(wordStatQuery, collectionName);
-        Set<String> key =new HashSet<>();
+        Set<String> key = new HashSet<>();
         BigDecimal a = BigDecimal.ZERO;
-        for (Result r :results) {
+        for (Result r : results) {
             key.add(r.getName());
             a = a.add(r.getCount());
         }
         Pageable pageable = new PageRequest(wordStatQuery.getPageNo(), wordStatQuery.getPageSize());
         List<Conference> list = mongoTemplate.find(query(where(wordStatQuery.getColumn()).in(key)).with(pageable), Conference.class, collectionName);
-        return new RestData<>(list,a.intValue());
+        return new RestData<>(list, a.intValue());
+    }
+
+    public CloseableIterator<Conference> findAllByStream(String collectionName) {
+        Query query = new Query();
+        return mongoTemplate.stream(query, Conference.class, collectionName);
     }
 }

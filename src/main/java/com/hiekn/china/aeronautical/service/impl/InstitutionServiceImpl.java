@@ -1,29 +1,25 @@
 package com.hiekn.china.aeronautical.service.impl;
 
-import com.hiekn.boot.autoconfigure.base.exception.ServiceException;
 import com.hiekn.boot.autoconfigure.base.model.result.RestData;
-import com.hiekn.china.aeronautical.exception.ErrorCodes;
 import com.hiekn.china.aeronautical.model.bean.Institution;
+import com.hiekn.china.aeronautical.model.vo.FileImport;
 import com.hiekn.china.aeronautical.model.vo.InstitutionQuery;
 import com.hiekn.china.aeronautical.model.vo.WordStatQuery;
 import com.hiekn.china.aeronautical.repository.InstitutionRepository;
 import com.hiekn.china.aeronautical.service.InstitutionService;
 import com.hiekn.china.aeronautical.util.DataBeanUtils;
-import com.hiekn.china.aeronautical.util.JsonUtils;
-import com.hiekn.china.aeronautical.util.PoiUtils;
+import com.hiekn.china.aeronautical.util.ExcelUtils;
 import com.hiekn.china.aeronautical.util.QueryUtils;
+import com.hiekn.china.aeronautical.util.SheetHandler;
 import com.mongodb.WriteResult;
-import org.glassfish.jersey.media.multipart.FormDataBodyPart;
-import org.glassfish.jersey.media.multipart.FormDataContentDisposition;
+import org.apache.commons.io.FileUtils;
 import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.cglib.beans.BeanMap;
 import org.springframework.data.domain.*;
 import org.springframework.stereotype.Service;
 
-import javax.ws.rs.core.MediaType;
-import java.io.InputStream;
-import java.util.ArrayList;
-import java.util.HashMap;
+import java.io.File;
 import java.util.List;
 import java.util.Map;
 
@@ -71,32 +67,26 @@ public class InstitutionServiceImpl implements InstitutionService {
        return institutionRepository.wordStatistics(wordStatQuery,collectionName);
     }
 
-    public Map<String, Object> importData(FormDataContentDisposition fileInfo, InputStream fileIn, FormDataBodyPart formDataBodyPart) {
-        MediaType type = formDataBodyPart.getMediaType();
-        String name = null;
-        try {
-            name = new String(fileInfo.getFileName().getBytes("iso8859-1"),"utf-8");
-        }catch (Exception e) {
-
+    public Map<String, Object> importData(FileImport fileImport, String collectionName) {
+        if(fileImport.getFileInfo()!= null) {
+            File file = new File("temp" + System.currentTimeMillis());
+            try {
+                FileUtils.copyInputStreamToFile(fileImport.getFileIn(), file);
+                new ExcelUtils(new SheetHandler() {
+                    @Override
+                    public void endRow(int rowNum) {
+                        Map<String, Object> map = super.getRow();
+                        Institution conference = new Institution();
+                        BeanMap beanMap = BeanMap.create(conference);
+                        beanMap.putAll(map);
+                        institutionRepository.insert(conference, collectionName);
+                    }
+                }).process(file);
+            } catch (Exception e) {
+                e.printStackTrace();
+            }
         }
-        if (name == null) {
-            throw ServiceException.newInstance(ErrorCodes.UPLAD_FILE_ERROR);
-        }
-        List<Map<String, Object>> dataList = null;
-        List<Map<String, Object>> errorList = new ArrayList<>();
-
-        if (name.endsWith(".csv")) {
-//            dataList = CSVUtils.importCsv(fileIn);
-        } else if (name.endsWith(".xls")) {
-            dataList = PoiUtils.importXls(fileIn, name);
-        } else if (name.endsWith(".json")) {
-            dataList = JsonUtils.importJson(fileInfo, fileIn, formDataBodyPart);
-        } else {
-            throw ServiceException.newInstance(ErrorCodes.UPLAD_FILE_ERROR);
-        }
-        Map<String, Object> map=new HashMap<>();
-        map.put("data",dataList);
-        return map;
+        return null;
     }
 
     public List<Map<String, Object>> checkStat(String key){
