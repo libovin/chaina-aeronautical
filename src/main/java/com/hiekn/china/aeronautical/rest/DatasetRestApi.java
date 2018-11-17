@@ -4,19 +4,18 @@ import com.hiekn.boot.autoconfigure.base.model.result.RestData;
 import com.hiekn.boot.autoconfigure.base.model.result.RestResp;
 import com.hiekn.china.aeronautical.model.bean.Dataset;
 import com.hiekn.china.aeronautical.model.vo.DatasetQuery;
-import com.hiekn.china.aeronautical.model.vo.DatesetFile;
+import com.hiekn.china.aeronautical.model.vo.DatasetFile;
+import com.hiekn.china.aeronautical.service.ConferenceService;
 import com.hiekn.china.aeronautical.service.DatasetService;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
 import lombok.extern.java.Log;
-import org.apache.commons.io.FileUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 import javax.validation.Valid;
 import javax.ws.rs.*;
 import javax.ws.rs.core.MediaType;
-import java.io.File;
 
 @Component
 @Path("dataset")
@@ -27,6 +26,9 @@ public class DatasetRestApi {
 
     @Autowired
     private DatasetService datasetService;
+
+    @Autowired
+    private ConferenceService conferenceService;
 
     @ApiOperation("数据集列表")
     @POST
@@ -62,37 +64,8 @@ public class DatasetRestApi {
     @POST
     @Path("add")
     @Consumes(MediaType.MULTIPART_FORM_DATA)
-    public RestResp<Dataset> add(@BeanParam DatesetFile datesetFile) throws Exception {
-        File file = new File("s" + System.currentTimeMillis());
-        FileUtils.copyInputStreamToFile(datesetFile.getFileIn(), file);
-        file.delete();
-//        InputStream is = new FileInputStream(file);
-//        StreamingReader reader = StreamingReader.builder()
-//                .rowCacheSize(100)    // number of rows to keep in memory (defaults to 10)
-//                .bufferSize(4096)     // buffer size to use when reading InputStream to file (defaults to 1024)
-//                .sheetIndex(0)        // index of sheet to use (defaults to 0)
-//                .open(datesetFile.getFileIn());            // InputStream or File for XLSX file (required)
-//        StreamingWorkbook workbook = (StreamingWorkbook) StreamingReader.builder()
-//                .rowCacheSize(100)
-//                .bufferSize(4096)
-//                .open(datesetFile.getFileIn());
-//
-//        StreamingSheet reader = (StreamingSheet) workbook.getSheetAt(0);
-//        System.out.println(reader.getLastRowNum());
-//        Iterator rowIterator = reader.rowIterator();
-//        while (rowIterator.hasNext()) {
-//            StreamingRow row = (StreamingRow) rowIterator.next();
-//            Iterator cellIterator = row.cellIterator();
-//            while (cellIterator.hasNext()) {
-//                StreamingCell cell = (StreamingCell) cellIterator.next();
-//                System.out.print(cell.getRowIndex() + "  " + cell.getColumnIndex() + " --- ");
-//                System.out.println(cell.getStringCellValue());
-//            }
-//        }
-//
-//        List<Map<String, Object>> list = PoiUtils.importXls(datesetFile.getFileIn(),datesetFile.getFileInfo().getFileName());
-        return new RestResp<>();
-        //return new RestResp<>(datasetService.add(dataset));
+    public RestResp<Dataset> add(@Valid @BeanParam DatasetFile datesetFile) throws Exception {
+        return new RestResp<>(datasetService.add(datesetFile));
     }
 
 }

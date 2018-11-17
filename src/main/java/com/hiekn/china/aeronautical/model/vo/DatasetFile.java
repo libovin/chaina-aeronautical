@@ -14,7 +14,7 @@ import java.io.InputStream;
 
 @Data
 @ApiModel("数据集")
-public class DatesetFile {
+public class DatasetFile {
 
     @ApiModelProperty(example = "conference", value = "数据集类型",required = true)
     @NotBlank(message = "数据集类型不能为空")
