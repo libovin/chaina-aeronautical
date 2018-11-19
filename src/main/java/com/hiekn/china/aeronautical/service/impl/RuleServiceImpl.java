@@ -3,7 +3,6 @@ package com.hiekn.china.aeronautical.service.impl;
 import com.hiekn.boot.autoconfigure.base.exception.RestException;
 import com.hiekn.boot.autoconfigure.base.model.result.RestData;
 import com.hiekn.china.aeronautical.exception.ErrorCodes;
-import com.hiekn.china.aeronautical.model.bean.Dataset;
 import com.hiekn.china.aeronautical.model.bean.Dict;
 import com.hiekn.china.aeronautical.model.bean.Rule;
 import com.hiekn.china.aeronautical.model.bean.RuleModel;
@@ -36,7 +35,7 @@ public class RuleServiceImpl implements RuleService {
 
     @Override
     public RestData<Rule> findAll(RuleQuery bean) {
-        Dataset targe = new Dataset();
+        Rule targe = new Rule();
         Map<String, Object> map = QueryUtils.trastation(bean, targe);
         Example<Rule> example = Example.of((Rule) map.get("bean"));
         return new RestData<>(ruleRepository.findAll(example), ruleRepository.count(example));
@@ -53,16 +52,16 @@ public class RuleServiceImpl implements RuleService {
     }
 
     @Override
-    public Rule modify(String id, Rule dataset) {
+    public Rule modify(String id, Rule rule) {
         Rule targe = ruleRepository.findOne(id);
-        String[] stringArr = DataBeanUtils.getNullProperty(dataset);
-        BeanUtils.copyProperties(dataset, targe, stringArr);
+        String[] stringArr = DataBeanUtils.getNullProperty(rule);
+        BeanUtils.copyProperties(rule, targe, stringArr);
         return ruleRepository.save(targe);
     }
 
     @Override
-    public Rule add(Rule dataset) {
-        return ruleRepository.save(dataset);
+    public Rule add(Rule rule) {
+        return ruleRepository.save(rule);
     }
 
     @Override

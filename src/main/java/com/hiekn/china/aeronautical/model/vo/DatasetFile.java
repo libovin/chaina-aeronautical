@@ -26,6 +26,7 @@ public class DatasetFile {
     private String table;
 
     @ApiModelProperty(example = "default", value = "数据集key", required = true)
+    @NotBlank(message = "数据集key不能为空")
     @DefaultValue("default")
     @FormDataParam("key")
     private String key;
@@ -33,7 +34,6 @@ public class DatasetFile {
     @ApiModelProperty(example = "期刊数据集", value = "数据集名称")
     @FormDataParam("name")
     private String name;
-
 
     @ApiParam(value = "file")
     @FormDataParam("file")
