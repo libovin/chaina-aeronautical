@@ -7,6 +7,7 @@ import lombok.Data;
 import org.glassfish.jersey.media.multipart.FormDataBodyPart;
 import org.glassfish.jersey.media.multipart.FormDataContentDisposition;
 import org.glassfish.jersey.media.multipart.FormDataParam;
+import org.hibernate.validator.constraints.Length;
 import org.hibernate.validator.constraints.NotBlank;
 
 import javax.validation.constraints.Pattern;
@@ -27,6 +28,8 @@ public class DatasetFile {
 
     @ApiModelProperty(example = "default", value = "数据集key", required = true)
     @NotBlank(message = "数据集key不能为空")
+    @Length(min = 1, max = 16 ,message = "key长度必须在1到16之间")
+    @Pattern(regexp = "[\\d\\w]+",message = "key只能是数字或者字母")
     @DefaultValue("default")
     @FormDataParam("key")
     private String key;

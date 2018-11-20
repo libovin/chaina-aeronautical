@@ -44,7 +44,7 @@ public class DatasetRestApi {
     @DELETE
     @Path("{id}")
     public RestResp delete(@PathParam("id") String id) {
-        //datasetService.delete(id);
+        datasetService.delete(id);
         return new RestResp<>();
     }
 

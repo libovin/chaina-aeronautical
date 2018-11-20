@@ -54,7 +54,7 @@ public class PeriodicalRestApi {
     @DELETE
     @Path("{key}/{id}")
     public RestResp delete(@PathParam("id") String id, @PathParam("key") @DefaultValue("default") String key) {
-        //periodicalService.delete(id, collectionName + "_" + key);
+        periodicalService.delete(id, collectionName + "_" + key);
         return new RestResp<>();
     }
 
