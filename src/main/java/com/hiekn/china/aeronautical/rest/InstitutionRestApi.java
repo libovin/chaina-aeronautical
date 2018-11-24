@@ -157,4 +157,12 @@ public class InstitutionRestApi {
         return new RestResp<>(statDetailList);
     }
 
+    @POST
+    @Path("{key}/task/add")
+    @ApiOperation("添加任务")
+    public RestResp<Boolean> skillAdd(){
+
+        return new RestResp<>();
+    }
+
 }

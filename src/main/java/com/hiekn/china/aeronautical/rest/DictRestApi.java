@@ -41,7 +41,7 @@ public class DictRestApi {
     @DELETE
     @Path("{id}")
     public RestResp delete(@PathParam("id") String id) {
-        //dictService.delete(id);
+        dictService.delete(id);
         return new RestResp<>();
     }
 

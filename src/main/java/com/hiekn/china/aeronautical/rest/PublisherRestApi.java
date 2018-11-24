@@ -54,7 +54,7 @@ public class PublisherRestApi {
     @DELETE
     @Path("{key}/{id}")
     public RestResp delete(@PathParam("id") String id, @PathParam("key") @DefaultValue("default") String key) {
-        //publisherService.delete(id, collectionName + "_" + key);
+        publisherService.delete(id, collectionName + "_" + key);
         return new RestResp<>();
     }
 
@@ -145,5 +145,13 @@ public class PublisherRestApi {
     public RestResp<List<Map<String, Object>>> checkStat(@PathParam("key") @DefaultValue("default") String key) {
         List<Map<String, Object>> statDetailList = publisherService.checkStat(key);
         return new RestResp<>(statDetailList);
+    }
+
+    @POST
+    @Path("{key}/task/add")
+    @ApiOperation("添加任务")
+    public RestResp<Boolean> skillAdd(){
+
+        return new RestResp<>();
     }
 }

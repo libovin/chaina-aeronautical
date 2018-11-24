@@ -1,6 +1,7 @@
 package com.hiekn.china.aeronautical.model.bean;
 
 import com.hiekn.china.aeronautical.model.base.Base;
+import io.swagger.annotations.ApiModel;
 import io.swagger.annotations.ApiModelProperty;
 import lombok.Data;
 import org.springframework.data.mongodb.core.mapping.Document;
@@ -13,6 +14,7 @@ import java.util.Map;
  */
 @Data
 @Document
+@ApiModel(value = "研究机构")
 @XmlRootElement
 public class Institution extends Base {
 
