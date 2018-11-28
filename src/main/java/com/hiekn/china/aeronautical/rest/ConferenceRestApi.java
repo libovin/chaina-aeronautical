@@ -3,21 +3,35 @@ package com.hiekn.china.aeronautical.rest;
 import com.hiekn.boot.autoconfigure.base.model.result.RestData;
 import com.hiekn.boot.autoconfigure.base.model.result.RestResp;
 import com.hiekn.china.aeronautical.model.bean.Conference;
+import com.hiekn.china.aeronautical.model.bean.Task;
 import com.hiekn.china.aeronautical.model.vo.ConferenceQuery;
 import com.hiekn.china.aeronautical.model.vo.FileImport;
+import com.hiekn.china.aeronautical.model.vo.TaskAdd;
 import com.hiekn.china.aeronautical.model.vo.WordStatQuery;
 import com.hiekn.china.aeronautical.service.ConferenceService;
+import com.hiekn.china.aeronautical.service.TaskService;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 import javax.validation.Valid;
-import javax.ws.rs.*;
+import javax.ws.rs.BeanParam;
+import javax.ws.rs.Consumes;
+import javax.ws.rs.DELETE;
+import javax.ws.rs.DefaultValue;
+import javax.ws.rs.GET;
+import javax.ws.rs.POST;
+import javax.ws.rs.PUT;
+import javax.ws.rs.Path;
+import javax.ws.rs.PathParam;
+import javax.ws.rs.Produces;
+import javax.ws.rs.WebApplicationException;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 import javax.ws.rs.core.StreamingOutput;
 import java.io.IOException;
+import java.io.OutputStream;
 import java.nio.file.Files;
 import java.nio.file.Paths;
 import java.util.List;
@@ -31,6 +45,9 @@ public class ConferenceRestApi {
 
     @Autowired
     private ConferenceService conferenceService;
+
+    @Autowired
+    private TaskService taskService;
 
     private String collectionName = "conference";
 
@@ -109,7 +126,7 @@ public class ConferenceRestApi {
     public Response export(@PathParam("key") @DefaultValue("default") String key) {
         StreamingOutput fileStream = new StreamingOutput() {
             @Override
-            public void write(java.io.OutputStream output) throws IOException, WebApplicationException {
+            public void write(OutputStream output) throws IOException, WebApplicationException {
                 try {
                     java.nio.file.Path path = Paths.get("D:/tinydata.xlsx");
                     byte[] data = Files.readAllBytes(path);
@@ -139,9 +156,12 @@ public class ConferenceRestApi {
     @POST
     @Path("{key}/task/add")
     @ApiOperation("添加任务")
-    public RestResp<Boolean> skillAdd(){
-
-        return new RestResp<>();
+    public RestResp<Task> taskAdd(
+            @PathParam("key") @DefaultValue("default") String key,
+            @Valid TaskAdd taskAdd){
+        taskAdd.setKey(key);
+        taskAdd.setTable(collectionName);
+        return new RestResp<>(taskService.add(taskAdd));
     }
 
 }

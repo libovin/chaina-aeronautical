@@ -3,17 +3,30 @@ package com.hiekn.china.aeronautical.rest;
 import com.hiekn.boot.autoconfigure.base.model.result.RestData;
 import com.hiekn.boot.autoconfigure.base.model.result.RestResp;
 import com.hiekn.china.aeronautical.model.bean.Institution;
+import com.hiekn.china.aeronautical.model.bean.Task;
 import com.hiekn.china.aeronautical.model.vo.FileImport;
 import com.hiekn.china.aeronautical.model.vo.InstitutionQuery;
+import com.hiekn.china.aeronautical.model.vo.TaskAdd;
 import com.hiekn.china.aeronautical.model.vo.WordStatQuery;
 import com.hiekn.china.aeronautical.service.InstitutionService;
+import com.hiekn.china.aeronautical.service.TaskService;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 import javax.validation.Valid;
-import javax.ws.rs.*;
+import javax.ws.rs.BeanParam;
+import javax.ws.rs.Consumes;
+import javax.ws.rs.DELETE;
+import javax.ws.rs.DefaultValue;
+import javax.ws.rs.GET;
+import javax.ws.rs.POST;
+import javax.ws.rs.PUT;
+import javax.ws.rs.Path;
+import javax.ws.rs.PathParam;
+import javax.ws.rs.Produces;
+import javax.ws.rs.WebApplicationException;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 import javax.ws.rs.core.StreamingOutput;
@@ -31,6 +44,9 @@ public class InstitutionRestApi {
 
     @Autowired
     private InstitutionService institutionService;
+
+    @Autowired
+    private TaskService taskService;
 
     private String collectionName = "institution";
 
@@ -160,9 +176,12 @@ public class InstitutionRestApi {
     @POST
     @Path("{key}/task/add")
     @ApiOperation("添加任务")
-    public RestResp<Boolean> skillAdd(){
-
-        return new RestResp<>();
+    public RestResp<Task> taskAdd(
+            @PathParam("key") @DefaultValue("default") String key,
+            @Valid TaskAdd taskAdd){
+        taskAdd.setKey(key);
+        taskAdd.setTable(collectionName);
+        return new RestResp<>(taskService.add(taskAdd));
     }
 
 }

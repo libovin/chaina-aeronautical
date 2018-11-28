@@ -8,7 +8,7 @@ spring:
     name: china-aeronautical
 
 server:
-  port: 9991
+  port: 9990
 jersey:
   swagger:
     port: ${server.port}
