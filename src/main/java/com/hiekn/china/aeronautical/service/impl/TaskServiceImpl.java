@@ -6,19 +6,13 @@ import com.hiekn.china.aeronautical.model.bean.Task;
 import com.hiekn.china.aeronautical.model.vo.TaskAdd;
 import com.hiekn.china.aeronautical.model.vo.TaskRule;
 import com.hiekn.china.aeronautical.repository.TaskRepository;
+import com.hiekn.china.aeronautical.service.TaskAsyncService;
 import com.hiekn.china.aeronautical.service.TaskService;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.scheduling.annotation.Async;
-import org.springframework.scheduling.annotation.AsyncResult;
-import org.springframework.scheduling.concurrent.ThreadPoolTaskExecutor;
 import org.springframework.stereotype.Service;
-import org.springframework.util.concurrent.ListenableFuture;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.concurrent.CompletableFuture;
-import java.util.concurrent.Future;
-import java.util.function.Supplier;
 
 @Service("taskService")
 public class TaskServiceImpl implements TaskService {
@@ -27,7 +21,7 @@ public class TaskServiceImpl implements TaskService {
     private TaskRepository taskRepository;
 
     @Autowired
-    private ThreadPoolTaskExecutor customAsyncExecutor;
+    private TaskAsyncService taskAsyncService;
 
     @Override
     public Task add(TaskAdd taskAdd) {
@@ -49,8 +43,7 @@ public class TaskServiceImpl implements TaskService {
         task.setTaskRule(ruleList);
 
         Task target = taskRepository.save(task);
-        //TODO 执行任务
-        taskAsyncSubmit(target);
+        taskAsyncService.taskAsyncSubmit(target);
         return target;
     }
 
@@ -66,8 +59,9 @@ public class TaskServiceImpl implements TaskService {
 
     @Override
     public Task restart(String id) {
-        Task task = taskRepository.findOne(id);
-        return task;
+        Task target = taskRepository.findOne(id);
+        taskAsyncService.taskAsyncSubmit(target);
+        return target;
     }
 
     @Override
@@ -75,14 +69,5 @@ public class TaskServiceImpl implements TaskService {
         taskRepository.delete(id);
     }
 
-    @Async(value="customAsyncExecutor")
-    public CompletableFuture<Task> taskAsyncSubmit(Task task){
-        return CompletableFuture.completedFuture(runTask(task));
-    }
 
-
-    public Task runTask(Task task){
-        Task s = new Task();
-        return s;
-    }
 }
