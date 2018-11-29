@@ -16,7 +16,11 @@ import org.apache.commons.io.FileUtils;
 import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.cglib.beans.BeanMap;
-import org.springframework.data.domain.*;
+import org.springframework.data.domain.Example;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 
 import java.io.File;
@@ -63,12 +67,12 @@ public class ConferenceServiceImpl implements ConferenceService {
         return conferenceRepository.insert(conference, collectionName);
     }
 
-    public RestData<Conference> wordStatistics(WordStatQuery wordStatQuery,String collectionName) {
-       return conferenceRepository.wordStatistics(wordStatQuery,collectionName);
+    public RestData<Conference> wordStatistics(WordStatQuery wordStatQuery, String collectionName) {
+        return conferenceRepository.wordStatistics(wordStatQuery, collectionName);
     }
 
     public Map<String, Object> importData(FileImport fileImport, String collectionName) {
-        if(fileImport.getFileInfo()!= null) {
+        if (fileImport.getFileInfo() != null) {
             File file = new File("temp" + System.currentTimeMillis());
             try {
                 FileUtils.copyInputStreamToFile(fileImport.getFileIn(), file);
@@ -89,8 +93,11 @@ public class ConferenceServiceImpl implements ConferenceService {
         return null;
     }
 
-    public List<Map<String, Object>> checkStat(String key){
+    public List<Map<String, Object>> checkStat(String key) {
 
         return null;
     }
+
+
+
 }

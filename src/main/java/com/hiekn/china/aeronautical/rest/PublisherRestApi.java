@@ -10,6 +10,7 @@ import com.hiekn.china.aeronautical.model.vo.TaskAdd;
 import com.hiekn.china.aeronautical.model.vo.WordStatQuery;
 import com.hiekn.china.aeronautical.service.PublisherService;
 import com.hiekn.china.aeronautical.service.TaskService;
+import com.hiekn.china.aeronautical.util.DataBeanUtils;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -174,4 +175,12 @@ public class PublisherRestApi {
         taskAdd.setTable(collectionName);
         return new RestResp<>(taskService.add(taskAdd));
     }
+
+    @GET
+    @ApiOperation("出版机构字段")
+    @Path("column")
+    public RestResp getColumn(){
+        return new RestResp<>(DataBeanUtils.getProp(Publisher.class));
+    }
+
 }

@@ -10,6 +10,7 @@ import com.hiekn.china.aeronautical.model.vo.WebsiteQuery;
 import com.hiekn.china.aeronautical.model.vo.WordStatQuery;
 import com.hiekn.china.aeronautical.service.TaskService;
 import com.hiekn.china.aeronautical.service.WebsiteService;
+import com.hiekn.china.aeronautical.util.DataBeanUtils;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -173,5 +174,12 @@ public class WebsiteRestApi {
         taskAdd.setKey(key);
         taskAdd.setTable(collectionName);
         return new RestResp<>(taskService.add(taskAdd));
+    }
+
+    @GET
+    @ApiOperation("网站字段")
+    @Path("column")
+    public RestResp getColumn(){
+        return new RestResp<>(DataBeanUtils.getProp(Website.class));
     }
 }

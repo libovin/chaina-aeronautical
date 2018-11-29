@@ -1,12 +1,17 @@
 package com.hiekn.china.aeronautical.util;
 
+import io.swagger.annotations.ApiModelProperty;
 import org.springframework.beans.BeanUtils;
 import org.springframework.cglib.beans.BeanMap;
 
 import java.beans.PropertyDescriptor;
+import java.lang.reflect.Field;
+import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
 
 public class DataBeanUtils {
@@ -35,5 +40,25 @@ public class DataBeanUtils {
 
     public static <T> String[] getNullProperty(T o) {
         return getNullProperty(o, null);
+    }
+
+
+    public static List<Map<String, String>> getProp(Class cls) {
+        List<Map<String, String>> list =new ArrayList<>();
+        Field[] fields = cls.getDeclaredFields();
+        for (Field field : fields) {
+            Map<String, String> map = new HashMap<>(2);
+            String name = field.getName();
+            ApiModelProperty annotation = field.getAnnotation(ApiModelProperty.class);
+            if (annotation != null) {
+                String value = annotation.value();
+                if (!annotation.hidden()) {
+                    map.put("name",name);
+                    map.put("value", value);
+                    list.add(map);
+                }
+            }
+        }
+        return list;
     }
 }
