@@ -37,7 +37,7 @@ public class Task extends Base {
     private Integer status;
 
     /**
-     * 提升度
+     * 检测数
      */
     @ApiModelProperty(hidden = true)
     private Integer promote;

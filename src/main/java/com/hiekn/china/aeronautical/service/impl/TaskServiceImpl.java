@@ -35,9 +35,7 @@ public class TaskServiceImpl implements TaskService {
         for (TaskRule t : taskAdd.getRules()) {
             Rule rule = new Rule();
             rule.setId(t.getId());
-            rule.setName(t.getName());
             rule.setColumn(t.getColumn());
-            rule.setRules(t.getRules());
             ruleList.add(rule);
         }
         task.setTaskRule(ruleList);
