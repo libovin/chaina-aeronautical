@@ -43,7 +43,7 @@ public class DataBeanUtils {
     }
 
 
-    public static List<Map<String, String>> getProp(Class cls) {
+    public static List<Map<String, String>> getClassProperty(Class cls) {
         List<Map<String, String>> list =new ArrayList<>();
         Field[] fields = cls.getDeclaredFields();
         for (Field field : fields) {
@@ -53,7 +53,7 @@ public class DataBeanUtils {
             if (annotation != null) {
                 String value = annotation.value();
                 if (!annotation.hidden()) {
-                    map.put("name",name);
+                    map.put("key",name);
                     map.put("value", value);
                     list.add(map);
                 }

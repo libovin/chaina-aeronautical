@@ -33,8 +33,6 @@ import javax.ws.rs.core.Response;
 import javax.ws.rs.core.StreamingOutput;
 import java.io.IOException;
 import java.io.OutputStream;
-import java.nio.file.Files;
-import java.nio.file.Paths;
 import java.util.List;
 import java.util.Map;
 
@@ -140,14 +138,7 @@ public class PeriodicalRestApi {
         StreamingOutput fileStream = new StreamingOutput() {
             @Override
             public void write(OutputStream output) throws IOException, WebApplicationException {
-                try {
-                    java.nio.file.Path path = Paths.get("D:/tinydata.xlsx");
-                    byte[] data = Files.readAllBytes(path);
-                    output.write(data);
-                    output.flush();
-                } catch (Exception e) {
-                    throw new WebApplicationException("File Not Found !!");
-                }
+                periodicalService.exportData("", output);
             }
         };
         return Response
@@ -180,7 +171,7 @@ public class PeriodicalRestApi {
     @ApiOperation("期刊字段")
     @Path("column")
     public RestResp getColumn(){
-        return new RestResp<>(DataBeanUtils.getProp(Periodical.class));
+        return new RestResp<>(DataBeanUtils.getClassProperty(Periodical.class));
     }
 
 }

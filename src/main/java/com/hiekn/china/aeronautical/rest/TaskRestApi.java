@@ -26,7 +26,7 @@ public class TaskRestApi {
     @Autowired
     private TaskService taskService;
 
-    @GET
+    @POST
     @Path("list")
     @ApiOperation("任务列表")
     public RestResp<RestData<Task>> list() {

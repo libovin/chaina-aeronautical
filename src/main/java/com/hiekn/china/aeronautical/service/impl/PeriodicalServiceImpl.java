@@ -16,10 +16,18 @@ import org.apache.commons.io.FileUtils;
 import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.cglib.beans.BeanMap;
-import org.springframework.data.domain.*;
+import org.springframework.data.domain.Example;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 
 import java.io.File;
+import java.io.OutputStream;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.util.List;
 import java.util.Map;
 
@@ -93,5 +101,16 @@ public class PeriodicalServiceImpl implements PeriodicalService {
     public List<Map<String, Object>> checkStat(String key) {
 
         return null;
+    }
+
+    public void exportData(String type, OutputStream output){
+        try {
+            Path path = Paths.get("D:/tinydata.xlsx");
+            byte[] data = Files.readAllBytes(path);
+            output.write(data);
+            output.flush();
+        } catch (Exception e) {
+
+        }
     }
 }

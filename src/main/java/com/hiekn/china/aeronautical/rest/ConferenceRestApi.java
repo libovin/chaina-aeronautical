@@ -33,8 +33,6 @@ import javax.ws.rs.core.Response;
 import javax.ws.rs.core.StreamingOutput;
 import java.io.IOException;
 import java.io.OutputStream;
-import java.nio.file.Files;
-import java.nio.file.Paths;
 import java.util.List;
 import java.util.Map;
 
@@ -116,7 +114,7 @@ public class ConferenceRestApi {
     public RestResp<Map<String, Object>> importData(
             @BeanParam FileImport fileImport,
             @PathParam("key") @DefaultValue("default") String key) {
-        Map<String, Object> map = conferenceService.importData(fileImport,collectionName + "_" + key);
+        Map<String, Object> map = conferenceService.importData(fileImport, collectionName + "_" + key);
         return new RestResp<>(map);
     }
 
@@ -128,14 +126,7 @@ public class ConferenceRestApi {
         StreamingOutput fileStream = new StreamingOutput() {
             @Override
             public void write(OutputStream output) throws IOException, WebApplicationException {
-                try {
-                    java.nio.file.Path path = Paths.get("D:/tinydata.xlsx");
-                    byte[] data = Files.readAllBytes(path);
-                    output.write(data);
-                    output.flush();
-                } catch (Exception e) {
-                    throw new WebApplicationException("File Not Found !!");
-                }
+                conferenceService.exportData("", output);
             }
         };
         return Response
@@ -159,7 +150,7 @@ public class ConferenceRestApi {
     @ApiOperation("添加任务")
     public RestResp<Task> taskAdd(
             @PathParam("key") @DefaultValue("default") String key,
-            @Valid TaskAdd taskAdd){
+            @Valid TaskAdd taskAdd) {
         taskAdd.setKey(key);
         taskAdd.setTable(collectionName);
         return new RestResp<>(taskService.add(taskAdd));
@@ -169,8 +160,8 @@ public class ConferenceRestApi {
     @GET
     @ApiOperation("会议字段")
     @Path("column")
-    public RestResp getColumn(){
-        return new RestResp<>(DataBeanUtils.getProp(Conference.class));
+    public RestResp getColumn() {
+        return new RestResp<>(DataBeanUtils.getClassProperty(Conference.class));
     }
 
 }

@@ -34,7 +34,8 @@ public class Task extends Base {
      * 状态
      */
     @ApiModelProperty(hidden = true)
-    private Integer status;
+
+    private Integer status = 0;
 
     /**
      * 检测数

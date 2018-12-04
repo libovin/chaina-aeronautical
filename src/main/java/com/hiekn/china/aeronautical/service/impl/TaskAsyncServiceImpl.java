@@ -40,7 +40,24 @@ public class TaskAsyncServiceImpl implements TaskAsyncService {
 
     @Async(value = "customAsyncExecutor")
     public CompletableFuture<Task> taskAsyncSubmit(Task task) {
-        return CompletableFuture.completedFuture(runTask(task));
+
+        try {
+            Thread.sleep(30000);
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+
+
+        return CompletableFuture.completedFuture(runTask(task)).whenComplete((t, e) -> {
+            if (e == null) {
+                t.setStatus(1);
+                taskRepository.save(t);
+            } else {
+                t.setStatus(2);
+                taskRepository.save(t);
+                throw new RuntimeException(e);
+            }
+        });
     }
 
 
@@ -59,9 +76,8 @@ public class TaskAsyncServiceImpl implements TaskAsyncService {
             }
         }
         dbCursor.close();
-        task.setStatus(1);
         task.setErrorCount(errorCount);
-        return taskRepository.save(task);
+        return task;
     }
 
     private boolean checkSingle(String jsonString, List<Rule> rules, String collectionName) {

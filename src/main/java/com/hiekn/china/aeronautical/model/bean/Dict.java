@@ -1,7 +1,6 @@
 package com.hiekn.china.aeronautical.model.bean;
 
 import com.hiekn.china.aeronautical.model.base.Base;
-import io.swagger.annotations.ApiModel;
 import io.swagger.annotations.ApiModelProperty;
 import lombok.Data;
 import org.hibernate.validator.constraints.NotBlank;
@@ -9,7 +8,7 @@ import org.springframework.data.mongodb.core.mapping.Document;
 
 import javax.validation.constraints.Pattern;
 import javax.xml.bind.annotation.XmlRootElement;
-import java.util.Set;
+import java.util.LinkedHashSet;
 
 /**
  * 字典
@@ -35,5 +34,5 @@ public class Dict extends Base {
     private String name;
 
     @ApiModelProperty(value = "字典内容")
-    private Set<String> text;
+    private LinkedHashSet<String> text;
 }

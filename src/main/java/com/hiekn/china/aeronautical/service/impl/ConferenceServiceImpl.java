@@ -24,6 +24,10 @@ import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 
 import java.io.File;
+import java.io.OutputStream;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.util.List;
 import java.util.Map;
 
@@ -99,5 +103,15 @@ public class ConferenceServiceImpl implements ConferenceService {
     }
 
 
+    public void exportData(String type, OutputStream output){
+        try {
+            Path path = Paths.get("D:/tinydata.xlsx");
+            byte[] data = Files.readAllBytes(path);
+            output.write(data);
+            output.flush();
+        } catch (Exception e) {
+
+        }
+    }
 
 }

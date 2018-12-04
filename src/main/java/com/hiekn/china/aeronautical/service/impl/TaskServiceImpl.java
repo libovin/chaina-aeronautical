@@ -39,7 +39,7 @@ public class TaskServiceImpl implements TaskService {
             ruleList.add(rule);
         }
         task.setTaskRule(ruleList);
-
+        task.setStatus(0);
         Task target = taskRepository.save(task);
         taskAsyncService.taskAsyncSubmit(target);
         return target;
@@ -58,7 +58,9 @@ public class TaskServiceImpl implements TaskService {
     @Override
     public Task restart(String id) {
         Task target = taskRepository.findOne(id);
-        taskAsyncService.taskAsyncSubmit(target);
+        if(target.getStatus()== 0) {
+            taskAsyncService.taskAsyncSubmit(target);
+        }
         return target;
     }
 
