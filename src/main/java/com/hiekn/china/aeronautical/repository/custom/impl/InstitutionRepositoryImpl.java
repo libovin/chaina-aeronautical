@@ -11,6 +11,7 @@ import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.mongodb.core.MongoTemplate;
 import org.springframework.data.mongodb.core.query.Query;
+import org.springframework.data.util.CloseableIterator;
 import org.springframework.util.Assert;
 
 import java.math.BigDecimal;
@@ -50,4 +51,8 @@ public class InstitutionRepositoryImpl extends BaseRepositoryCustomImpl<Institut
         return new RestData<>(list,a.intValue());
     }
 
+    public CloseableIterator<Institution> findAllByStream(String collectionName) {
+        Query query = new Query();
+        return mongoTemplate.stream(query, Institution.class, collectionName);
+    }
 }

@@ -9,11 +9,10 @@ import com.hiekn.china.aeronautical.repository.ConferenceRepository;
 import com.hiekn.china.aeronautical.service.ConferenceService;
 import com.hiekn.china.aeronautical.service.ImportAsyncService;
 import com.hiekn.china.aeronautical.util.DataBeanUtils;
+import com.hiekn.china.aeronautical.util.ExportUtils;
 import com.hiekn.china.aeronautical.util.QueryUtils;
 import com.mongodb.WriteResult;
 import org.apache.commons.io.FileUtils;
-import org.apache.poi.ss.usermodel.Cell;
-import org.apache.poi.ss.usermodel.Row;
 import org.apache.poi.ss.usermodel.Sheet;
 import org.apache.poi.ss.usermodel.Workbook;
 import org.apache.poi.xssf.streaming.SXSSFWorkbook;
@@ -109,35 +108,22 @@ public class ConferenceServiceImpl implements ConferenceService {
 
     public void exportData(String collectionName, OutputStream output) {
         try {
-            Workbook wb = new SXSSFWorkbook(1000);
-            CloseableIterator<Conference> c= conferenceRepository.findAllByStream(collectionName);
-            int index = 0;
+            Workbook wb = new SXSSFWorkbook(100);
+            CloseableIterator<Conference> c = conferenceRepository.findAllByStream(collectionName);
+            int index = 1;
             Sheet sheet = wb.createSheet();
+            ExportUtils.addOneRow(sheet.createRow(0), DataBeanUtils.getFieldList(Conference.class));
             while (c.hasNext()) {
-                Conference conference =  c.next();
-                Row row = sheet.createRow(index);
-                row.createCell(0).setCellValue(conference.getName());
-                row.createCell(1).setCellValue(conference.getCoOrganizer());
-                row.createCell(2).setCellValue(conference.getMeetingCycle());
-                index ++;
+                Conference conference = c.next();
+                ExportUtils.addOneRow(sheet.createRow(index), DataBeanUtils.getFieldValueList(conference));
+                index++;
             }
-            c.close();
             wb.write(output);
+            c.close();
             output.close();
             wb.close();
         } catch (Exception e) {
             e.printStackTrace();
         }
     }
-
-
-    private void addOneRowOfHeadDataToExcel(Row row, List<String> headByRowNum) {
-        if (headByRowNum != null && headByRowNum.size() > 0) {
-            for (int i = 0; i < headByRowNum.size(); i++) {
-                Cell cell = row.createCell(i);
-                cell.setCellValue(headByRowNum.get(i));
-            }
-        }
-    }
-
 }

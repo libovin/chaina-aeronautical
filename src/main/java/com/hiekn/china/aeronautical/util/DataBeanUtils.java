@@ -44,7 +44,7 @@ public class DataBeanUtils {
 
 
     public static List<Map<String, String>> getClassProperty(Class cls) {
-        List<Map<String, String>> list =new ArrayList<>();
+        List<Map<String, String>> list = new ArrayList<>();
         Field[] fields = cls.getDeclaredFields();
         for (Field field : fields) {
             Map<String, String> map = new HashMap<>(2);
@@ -53,10 +53,39 @@ public class DataBeanUtils {
             if (annotation != null) {
                 String value = annotation.value();
                 if (!annotation.hidden()) {
-                    map.put("key",name);
+                    map.put("key", name);
                     map.put("value", value);
                     list.add(map);
                 }
+            }
+        }
+        return list;
+    }
+
+    public static List<String> getFieldList(Class cls) {
+        List<String> list = new ArrayList<>();
+        Field[] fields = cls.getDeclaredFields();
+        for (Field field : fields) {
+
+            String name = field.getName();
+            list.add(name);
+        }
+        return list;
+    }
+
+    public static List<String> getFieldValueList(Object o) {
+        List<String> list = new ArrayList<>();
+        Field[] fields = o.getClass().getDeclaredFields();
+        for (Field field : fields) {
+            field.setAccessible(true);
+            if (field.getType().getName().equals(String.class.getName())) {
+                try {
+                    list.add((String) field.get(o));
+                } catch (Exception e) {
+                    e.printStackTrace();
+                }
+            } else {
+                list.add(null);
             }
         }
         return list;

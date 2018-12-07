@@ -3,16 +3,19 @@ package com.hiekn.china.aeronautical.rest;
 import com.hiekn.boot.autoconfigure.base.model.result.RestData;
 import com.hiekn.boot.autoconfigure.base.model.result.RestResp;
 import com.hiekn.china.aeronautical.model.bean.Conference;
+import com.hiekn.china.aeronautical.model.bean.Dataset;
 import com.hiekn.china.aeronautical.model.bean.Task;
 import com.hiekn.china.aeronautical.model.vo.ConferenceQuery;
 import com.hiekn.china.aeronautical.model.vo.FileImport;
 import com.hiekn.china.aeronautical.model.vo.TaskAdd;
 import com.hiekn.china.aeronautical.model.vo.WordStatQuery;
 import com.hiekn.china.aeronautical.service.ConferenceService;
+import com.hiekn.china.aeronautical.service.DatasetService;
 import com.hiekn.china.aeronautical.service.TaskService;
 import com.hiekn.china.aeronautical.util.DataBeanUtils;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
+import org.apache.commons.compress.utils.CharsetNames;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
@@ -47,6 +50,9 @@ public class ConferenceRestApi {
 
     @Autowired
     private TaskService taskService;
+
+    @Autowired
+    private DatasetService datasetService;
 
     private String collectionName = "conference";
 
@@ -123,15 +129,22 @@ public class ConferenceRestApi {
     @Path("{key}/export")
     @Produces(MediaType.APPLICATION_OCTET_STREAM)
     public Response export(@PathParam("key") @DefaultValue("default") String key) {
+        Dataset dataset = datasetService.findFirstByTypeKey(collectionName + "_" + key);
         StreamingOutput fileStream = new StreamingOutput() {
             @Override
             public void write(OutputStream output) throws IOException, WebApplicationException {
                 conferenceService.exportData(collectionName + "_" + key, output);
             }
         };
+        String fileName ="file";
+        try {
+            fileName= new String(dataset.getName().getBytes(CharsetNames.UTF_8), CharsetNames.ISO_8859_1);
+        }catch (Exception e) {
+
+        }
         return Response
                 .ok(fileStream, MediaType.APPLICATION_OCTET_STREAM)
-                .header("content-disposition", "attachment; filename = tinydata.xlsx")
+                .header("content-disposition", "attachment; filename = " + fileName + ".xlsx")
                 .build();
     }
 

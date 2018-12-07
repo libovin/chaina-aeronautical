@@ -28,5 +28,5 @@ public interface PeriodicalService {
 
     List<Map<String, Object>> checkStat(String key);
 
-    void exportData(String type, OutputStream output);
+    void exportData(String collectionName, OutputStream output);
 }

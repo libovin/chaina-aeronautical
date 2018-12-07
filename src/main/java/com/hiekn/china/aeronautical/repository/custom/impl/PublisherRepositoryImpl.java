@@ -10,6 +10,8 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.mongodb.core.MongoTemplate;
+import org.springframework.data.mongodb.core.query.Query;
+import org.springframework.data.util.CloseableIterator;
 import org.springframework.util.Assert;
 
 import java.math.BigDecimal;
@@ -46,5 +48,10 @@ public class PublisherRepositoryImpl extends BaseRepositoryCustomImpl<Publisher>
         Pageable pageable = new PageRequest(wordStatQuery.getPageNo(), wordStatQuery.getPageSize());
         List<Publisher> list =  mongoTemplate.find(query(where(wordStatQuery.getColumn()).in(key)).with(pageable), Publisher.class, collectionName);
         return new RestData<>(list,a.intValue());
+    }
+
+    public CloseableIterator<Publisher> findAllByStream(String collectionName) {
+        Query query = new Query();
+        return mongoTemplate.stream(query, Publisher.class, collectionName);
     }
 }

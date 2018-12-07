@@ -20,6 +20,7 @@ import org.apache.commons.io.FileUtils;
 import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Example;
+import org.springframework.data.mongodb.core.MongoTemplate;
 import org.springframework.stereotype.Service;
 
 import java.io.File;
@@ -32,7 +33,8 @@ public class DatasetServiceImpl implements DatasetService {
 
     @Autowired
     private DatasetRepository datasetRepository;
-
+    @Autowired
+    private MongoTemplate mongoTemplate;
     @Autowired
     private ImportAsyncService importAsyncService;
 
@@ -51,6 +53,9 @@ public class DatasetServiceImpl implements DatasetService {
 
     @Override
     public void delete(String id) {
+        Dataset dataset = datasetRepository.findOne(id);
+        String collectionName = dataset.getTypeKey();
+        mongoTemplate.dropCollection(collectionName);
         datasetRepository.delete(id);
     }
 
@@ -62,23 +67,28 @@ public class DatasetServiceImpl implements DatasetService {
         return datasetRepository.save(targe);
     }
 
+    public Dataset findFirstByTypeKey(String typeKey) {
+        return datasetRepository.findFirstByTypeKey(typeKey);
+    }
+
     @Override
-    public Dataset add(DatasetFile datesetFile){
+    public Dataset add(DatasetFile datesetFile) {
         Dataset dataset = new Dataset();
         dataset.setTable(datesetFile.getTable());
         dataset.setKey(datesetFile.getKey());
-        dataset.setTypeKey(datesetFile.getTable() +"_"+ datesetFile.getKey());
+        dataset.setTypeKey(datesetFile.getTable() + "_" + datesetFile.getKey());
         dataset.setName(datesetFile.getName());
-        if (datasetRepository.existsDatasetByTypeKey(dataset.getTypeKey())){
+        if (datasetRepository.existsDatasetByTypeKey(dataset.getTypeKey())) {
             throw RestException.newInstance(ErrorCodes.NAME_EXIST_ERROR);
         }
         Dataset dataset1 = datasetRepository.save(dataset);
-        if(datesetFile.getFileInfo()!= null) {
+        if (datesetFile.getFileInfo() != null) {
             File file = new File("temp" + System.currentTimeMillis());
             try {
                 FileUtils.copyInputStreamToFile(datesetFile.getFileIn(), file);
                 importAsyncService.importExcelToDataset(getTableClass(dataset.getTable()), file, dataset.getTypeKey());
             } catch (IOException e) {
+                e.printStackTrace();
             }
         }
         return dataset1;

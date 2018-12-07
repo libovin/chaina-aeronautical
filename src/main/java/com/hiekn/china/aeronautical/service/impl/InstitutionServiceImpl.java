@@ -9,9 +9,13 @@ import com.hiekn.china.aeronautical.repository.InstitutionRepository;
 import com.hiekn.china.aeronautical.service.ImportAsyncService;
 import com.hiekn.china.aeronautical.service.InstitutionService;
 import com.hiekn.china.aeronautical.util.DataBeanUtils;
+import com.hiekn.china.aeronautical.util.ExportUtils;
 import com.hiekn.china.aeronautical.util.QueryUtils;
 import com.mongodb.WriteResult;
 import org.apache.commons.io.FileUtils;
+import org.apache.poi.ss.usermodel.Sheet;
+import org.apache.poi.ss.usermodel.Workbook;
+import org.apache.poi.xssf.streaming.SXSSFWorkbook;
 import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Example;
@@ -19,14 +23,12 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
+import org.springframework.data.util.CloseableIterator;
 import org.springframework.stereotype.Service;
 
 import java.io.File;
 import java.io.IOException;
 import java.io.OutputStream;
-import java.nio.file.Files;
-import java.nio.file.Path;
-import java.nio.file.Paths;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -103,14 +105,24 @@ public class InstitutionServiceImpl implements InstitutionService {
         return null;
     }
 
-    public void exportData(String type, OutputStream output){
+    public void exportData(String collectionName, OutputStream output) {
         try {
-            Path path = Paths.get("D:/tinydata.xlsx");
-            byte[] data = Files.readAllBytes(path);
-            output.write(data);
-            output.flush();
+            Workbook wb = new SXSSFWorkbook(100);
+            CloseableIterator<Institution> c = institutionRepository.findAllByStream(collectionName);
+            int index = 1;
+            Sheet sheet = wb.createSheet();
+            ExportUtils.addOneRow(sheet.createRow(0), DataBeanUtils.getFieldList(Institution.class));
+            while (c.hasNext()) {
+                Institution item = c.next();
+                ExportUtils.addOneRow(sheet.createRow(index), DataBeanUtils.getFieldValueList(item));
+                index++;
+            }
+            wb.write(output);
+            c.close();
+            output.close();
+            wb.close();
         } catch (Exception e) {
-
+            e.printStackTrace();
         }
     }
 }

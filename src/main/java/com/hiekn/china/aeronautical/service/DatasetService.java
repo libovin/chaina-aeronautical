@@ -16,4 +16,6 @@ public interface DatasetService {
     Dataset modify(String id, Dataset dataset);
 
     Dataset add(DatasetFile dataset);
+
+    Dataset findFirstByTypeKey(String typeKey);
 }

@@ -5,4 +5,6 @@ import org.springframework.data.mongodb.repository.MongoRepository;
 
 public interface DatasetRepository extends MongoRepository<Dataset,String> {
     boolean existsDatasetByTypeKey(String typeKey);
+
+    Dataset findFirstByTypeKey(String typeKey);
 }
