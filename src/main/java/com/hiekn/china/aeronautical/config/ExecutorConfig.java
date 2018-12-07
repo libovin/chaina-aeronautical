@@ -28,6 +28,18 @@ public class ExecutorConfig  implements AsyncConfigurer {
         return executor;
     }
 
+    @Bean(name = "importAsyncExecutor")
+    public Executor getImportAsyncExecutor() {
+        ThreadPoolTaskExecutor executor = new ThreadPoolTaskExecutor();
+        executor.setCorePoolSize(2);
+        executor.setMaxPoolSize(5);
+        executor.setQueueCapacity(99999);
+        executor.setThreadNamePrefix("Import-Pool-");
+        executor.setRejectedExecutionHandler(new ThreadPoolExecutor.CallerRunsPolicy());
+        executor.initialize();
+        return executor;
+    }
+
     @Override
     public AsyncUncaughtExceptionHandler getAsyncUncaughtExceptionHandler() {
         return new SimpleAsyncUncaughtExceptionHandler();

@@ -5,24 +5,27 @@ import com.hiekn.boot.autoconfigure.base.model.result.RestData;
 import com.hiekn.china.aeronautical.exception.ErrorCodes;
 import com.hiekn.china.aeronautical.model.bean.Conference;
 import com.hiekn.china.aeronautical.model.bean.Dataset;
+import com.hiekn.china.aeronautical.model.bean.Institution;
+import com.hiekn.china.aeronautical.model.bean.Periodical;
+import com.hiekn.china.aeronautical.model.bean.Publisher;
+import com.hiekn.china.aeronautical.model.bean.Website;
 import com.hiekn.china.aeronautical.model.vo.DatasetFile;
 import com.hiekn.china.aeronautical.model.vo.DatasetQuery;
-import com.hiekn.china.aeronautical.repository.ConferenceRepository;
 import com.hiekn.china.aeronautical.repository.DatasetRepository;
 import com.hiekn.china.aeronautical.service.DatasetService;
+import com.hiekn.china.aeronautical.service.ImportAsyncService;
 import com.hiekn.china.aeronautical.util.DataBeanUtils;
-import com.hiekn.china.aeronautical.util.ExcelUtils;
 import com.hiekn.china.aeronautical.util.QueryUtils;
-import com.hiekn.china.aeronautical.util.SheetHandler;
 import org.apache.commons.io.FileUtils;
 import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.cglib.beans.BeanMap;
 import org.springframework.data.domain.Example;
 import org.springframework.stereotype.Service;
 
 import java.io.File;
+import java.io.IOException;
 import java.util.Map;
+import java.util.Objects;
 
 @Service("datasetService")
 public class DatasetServiceImpl implements DatasetService {
@@ -31,7 +34,7 @@ public class DatasetServiceImpl implements DatasetService {
     private DatasetRepository datasetRepository;
 
     @Autowired
-    private ConferenceRepository conferenceRepository;
+    private ImportAsyncService importAsyncService;
 
     @Override
     public RestData<Dataset> findAll(DatasetQuery bean) {
@@ -74,23 +77,27 @@ public class DatasetServiceImpl implements DatasetService {
             File file = new File("temp" + System.currentTimeMillis());
             try {
                 FileUtils.copyInputStreamToFile(datesetFile.getFileIn(), file);
-                new ExcelUtils(new SheetHandler() {
-                    @Override
-                    public void endRow(int rowNum) {
-                        Map<String, Object> map = super.getRow();
-                        Conference conference = new Conference();
-                        BeanMap beanMap = BeanMap.create(conference);
-                        beanMap.putAll(map);
-                        conferenceRepository.insert(conference, dataset.getTypeKey());
-                    }
-                }).process(file);
-            } catch (Exception e) {
-                e.printStackTrace();
+                importAsyncService.importExcelToDataset(getTableClass(dataset.getTable()), file, dataset.getTypeKey());
+            } catch (IOException e) {
             }
         }
         return dataset1;
     }
 
+    private Class getTableClass(String table) {
+        if (Objects.equals("conference", table)) {
+            return Conference.class;
+        } else if (Objects.equals("institution", table)) {
+            return Institution.class;
+        } else if (Objects.equals("periodical", table)) {
+            return Periodical.class;
+        } else if (Objects.equals("publisher", table)) {
+            return Publisher.class;
+        } else if (Objects.equals("website", table)) {
+            return Website.class;
+        }
+        return null;
+    }
 
 
 }

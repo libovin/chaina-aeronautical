@@ -6,16 +6,14 @@ import com.hiekn.china.aeronautical.model.vo.FileImport;
 import com.hiekn.china.aeronautical.model.vo.PeriodicalQuery;
 import com.hiekn.china.aeronautical.model.vo.WordStatQuery;
 import com.hiekn.china.aeronautical.repository.PeriodicalRepository;
+import com.hiekn.china.aeronautical.service.ImportAsyncService;
 import com.hiekn.china.aeronautical.service.PeriodicalService;
 import com.hiekn.china.aeronautical.util.DataBeanUtils;
-import com.hiekn.china.aeronautical.util.ExcelUtils;
 import com.hiekn.china.aeronautical.util.QueryUtils;
-import com.hiekn.china.aeronautical.util.SheetHandler;
 import com.mongodb.WriteResult;
 import org.apache.commons.io.FileUtils;
 import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.cglib.beans.BeanMap;
 import org.springframework.data.domain.Example;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
@@ -24,10 +22,12 @@ import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 
 import java.io.File;
+import java.io.IOException;
 import java.io.OutputStream;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
@@ -37,6 +37,9 @@ public class PeriodicalServiceImpl implements PeriodicalService {
 
     @Autowired
     private PeriodicalRepository periodicalRepository;
+
+    @Autowired
+    private ImportAsyncService importAsyncService;
 
     public RestData<Periodical> findAll(PeriodicalQuery bean, String collectionName) {
         Pageable pageable;
@@ -77,25 +80,23 @@ public class PeriodicalServiceImpl implements PeriodicalService {
     }
 
     public Map<String, Object> importData(FileImport fileImport, String collectionName) {
+        Map<String, Object> map = new HashMap<>(2);
         if (fileImport.getFileInfo() != null) {
             File file = new File("temp" + System.currentTimeMillis());
             try {
                 FileUtils.copyInputStreamToFile(fileImport.getFileIn(), file);
-                new ExcelUtils(new SheetHandler() {
-                    @Override
-                    public void endRow(int rowNum) {
-                        Map<String, Object> map = super.getRow();
-                        Periodical conference = new Periodical();
-                        BeanMap beanMap = BeanMap.create(conference);
-                        beanMap.putAll(map);
-                        periodicalRepository.insert(conference, collectionName);
-                    }
-                }).process(file);
-            } catch (Exception e) {
-                e.printStackTrace();
+                map.put("msg", "上传成功");
+                map.put("code", "success");
+                importAsyncService.importExcelToDataset(Periodical.class, file, collectionName);
+            } catch (IOException e) {
+                map.put("msg", "上传失败，无法上传文件");
+                map.put("code", "fail");
             }
+        } else {
+            map.put("msg", "上传失败，文件不能为空");
+            map.put("code", "fail");
         }
-        return null;
+        return map;
     }
 
     public List<Map<String, Object>> checkStat(String key) {

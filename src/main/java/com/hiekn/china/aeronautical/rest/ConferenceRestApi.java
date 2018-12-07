@@ -126,7 +126,7 @@ public class ConferenceRestApi {
         StreamingOutput fileStream = new StreamingOutput() {
             @Override
             public void write(OutputStream output) throws IOException, WebApplicationException {
-                conferenceService.exportData("", output);
+                conferenceService.exportData(collectionName + "_" + key, output);
             }
         };
         return Response

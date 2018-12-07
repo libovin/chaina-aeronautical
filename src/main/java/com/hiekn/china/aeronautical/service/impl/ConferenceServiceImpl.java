@@ -7,27 +7,30 @@ import com.hiekn.china.aeronautical.model.vo.FileImport;
 import com.hiekn.china.aeronautical.model.vo.WordStatQuery;
 import com.hiekn.china.aeronautical.repository.ConferenceRepository;
 import com.hiekn.china.aeronautical.service.ConferenceService;
+import com.hiekn.china.aeronautical.service.ImportAsyncService;
 import com.hiekn.china.aeronautical.util.DataBeanUtils;
-import com.hiekn.china.aeronautical.util.ExcelUtils;
 import com.hiekn.china.aeronautical.util.QueryUtils;
-import com.hiekn.china.aeronautical.util.SheetHandler;
 import com.mongodb.WriteResult;
 import org.apache.commons.io.FileUtils;
+import org.apache.poi.ss.usermodel.Cell;
+import org.apache.poi.ss.usermodel.Row;
+import org.apache.poi.ss.usermodel.Sheet;
+import org.apache.poi.ss.usermodel.Workbook;
+import org.apache.poi.xssf.streaming.SXSSFWorkbook;
 import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.cglib.beans.BeanMap;
 import org.springframework.data.domain.Example;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
+import org.springframework.data.util.CloseableIterator;
 import org.springframework.stereotype.Service;
 
 import java.io.File;
+import java.io.IOException;
 import java.io.OutputStream;
-import java.nio.file.Files;
-import java.nio.file.Path;
-import java.nio.file.Paths;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
@@ -36,6 +39,9 @@ public class ConferenceServiceImpl implements ConferenceService {
 
     @Autowired
     private ConferenceRepository conferenceRepository;
+
+    @Autowired
+    private ImportAsyncService importAsyncService;
 
     public RestData<Conference> findAll(ConferenceQuery bean, String collectionName) {
         Pageable pageable;
@@ -76,25 +82,23 @@ public class ConferenceServiceImpl implements ConferenceService {
     }
 
     public Map<String, Object> importData(FileImport fileImport, String collectionName) {
+        Map<String, Object> map = new HashMap<>(2);
         if (fileImport.getFileInfo() != null) {
             File file = new File("temp" + System.currentTimeMillis());
             try {
                 FileUtils.copyInputStreamToFile(fileImport.getFileIn(), file);
-                new ExcelUtils(new SheetHandler() {
-                    @Override
-                    public void endRow(int rowNum) {
-                        Map<String, Object> map = super.getRow();
-                        Conference conference = new Conference();
-                        BeanMap beanMap = BeanMap.create(conference);
-                        beanMap.putAll(map);
-                        conferenceRepository.insert(conference, collectionName);
-                    }
-                }).process(file);
-            } catch (Exception e) {
-                e.printStackTrace();
+                map.put("msg", "上传成功");
+                map.put("code", "success");
+                importAsyncService.importExcelToDataset(Conference.class, file, collectionName);
+            } catch (IOException e) {
+                map.put("msg", "上传失败，无法上传文件");
+                map.put("code", "fail");
             }
+        } else {
+            map.put("msg", "上传失败，文件不能为空");
+            map.put("code", "fail");
         }
-        return null;
+        return map;
     }
 
     public List<Map<String, Object>> checkStat(String key) {
@@ -103,14 +107,36 @@ public class ConferenceServiceImpl implements ConferenceService {
     }
 
 
-    public void exportData(String type, OutputStream output){
+    public void exportData(String collectionName, OutputStream output) {
         try {
-            Path path = Paths.get("D:/tinydata.xlsx");
-            byte[] data = Files.readAllBytes(path);
-            output.write(data);
-            output.flush();
+            Workbook wb = new SXSSFWorkbook(1000);
+            CloseableIterator<Conference> c= conferenceRepository.findAllByStream(collectionName);
+            int index = 0;
+            Sheet sheet = wb.createSheet();
+            while (c.hasNext()) {
+                Conference conference =  c.next();
+                Row row = sheet.createRow(index);
+                row.createCell(0).setCellValue(conference.getName());
+                row.createCell(1).setCellValue(conference.getCoOrganizer());
+                row.createCell(2).setCellValue(conference.getMeetingCycle());
+                index ++;
+            }
+            c.close();
+            wb.write(output);
+            output.close();
+            wb.close();
         } catch (Exception e) {
+            e.printStackTrace();
+        }
+    }
 
+
+    private void addOneRowOfHeadDataToExcel(Row row, List<String> headByRowNum) {
+        if (headByRowNum != null && headByRowNum.size() > 0) {
+            for (int i = 0; i < headByRowNum.size(); i++) {
+                Cell cell = row.createCell(i);
+                cell.setCellValue(headByRowNum.get(i));
+            }
         }
     }
 

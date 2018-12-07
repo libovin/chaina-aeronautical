@@ -1,13 +1,8 @@
 package com.hiekn.china.aeronautical.service.impl;
 
 import com.alibaba.fastjson.JSONObject;
-import com.hiekn.china.aeronautical.model.bean.Conference;
-import com.hiekn.china.aeronautical.model.bean.Institution;
-import com.hiekn.china.aeronautical.model.bean.Periodical;
-import com.hiekn.china.aeronautical.model.bean.Publisher;
 import com.hiekn.china.aeronautical.model.bean.Rule;
 import com.hiekn.china.aeronautical.model.bean.Task;
-import com.hiekn.china.aeronautical.model.bean.Website;
 import com.hiekn.china.aeronautical.repository.TaskRepository;
 import com.hiekn.china.aeronautical.service.TaskAsyncService;
 import com.hiekn.china.aeronautical.util.RuleUtils;
@@ -24,7 +19,6 @@ import org.springframework.stereotype.Service;
 
 import java.util.List;
 import java.util.Map;
-import java.util.Objects;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.regex.Matcher;
@@ -103,18 +97,4 @@ public class TaskAsyncServiceImpl implements TaskAsyncService {
         return hasError;
     }
 
-    private Class getTableClass(String table) {
-        if (Objects.equals("conference", table)) {
-            return Conference.class;
-        } else if (Objects.equals("institution", table)) {
-            return Institution.class;
-        } else if (Objects.equals("periodical", table)) {
-            return Periodical.class;
-        } else if (Objects.equals("publisher", table)) {
-            return Publisher.class;
-        } else if (Objects.equals("website", table)) {
-            return Website.class;
-        }
-        return null;
-    }
 }
