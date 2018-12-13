@@ -1,12 +1,11 @@
 package com.hiekn.china.aeronautical.model.bean;
 
-import com.hiekn.china.aeronautical.model.base.Base;
+import com.hiekn.china.aeronautical.model.base.MarkError;
 import io.swagger.annotations.ApiModelProperty;
 import lombok.Data;
 import org.springframework.data.mongodb.core.mapping.Document;
 
 import javax.xml.bind.annotation.XmlRootElement;
-import java.util.Map;
 
 /**
  * 网站
@@ -14,7 +13,7 @@ import java.util.Map;
 @Data
 @Document
 @XmlRootElement
-public class Website extends Base {
+public class Website extends MarkError {
 
     @ApiModelProperty(value = "网址")
     private String url;
@@ -60,11 +59,5 @@ public class Website extends Base {
 
     @ApiModelProperty(value = "重定向信息")
     private String redirection;
-
-    @ApiModelProperty(value = "是否有错", hidden = true)
-    private Boolean hasError = false;
-
-    @ApiModelProperty(value = "标错", hidden = true)
-    private Map<String, Boolean> errorTag;
 
 }

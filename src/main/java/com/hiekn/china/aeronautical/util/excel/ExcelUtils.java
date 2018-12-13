@@ -1,4 +1,4 @@
-package com.hiekn.china.aeronautical.util;
+package com.hiekn.china.aeronautical.util.excel;
 
 import org.apache.poi.openxml4j.exceptions.OpenXML4JException;
 import org.apache.poi.openxml4j.opc.OPCPackage;
@@ -31,6 +31,13 @@ public class ExcelUtils {
         this.sheetContentsHandler = handler;
     }
 
+    /**
+     *
+     * @param file
+     * @throws IOException
+     * @throws OpenXML4JException
+     * @throws SAXException
+     */
     public void process(File file) throws IOException, OpenXML4JException, SAXException {
         OPCPackage pkg = OPCPackage.open(file, PackageAccess.READ);
         try {
@@ -47,6 +54,14 @@ public class ExcelUtils {
         }
     }
 
+    /**
+     *
+     * @param styles
+     * @param strings
+     * @param sheetInputStream
+     * @throws IOException
+     * @throws SAXException
+     */
     private void processSheet(StylesTable styles, ReadOnlySharedStringsTable strings, InputStream sheetInputStream) throws IOException, SAXException {
         InputSource sheetSource = new InputSource(sheetInputStream);
         try {

@@ -6,4 +6,5 @@ public interface ImportAsyncService {
 
     void importExcelToDataset(Class cls, File file, String collectionName);
 
+    void importXmlToDataset(Class cls, File file, String collectionName);
 }

@@ -1,13 +1,12 @@
 package com.hiekn.china.aeronautical.model.bean;
 
-import com.hiekn.china.aeronautical.model.base.Base;
+import com.hiekn.china.aeronautical.model.base.MarkError;
 import io.swagger.annotations.ApiModel;
 import io.swagger.annotations.ApiModelProperty;
 import lombok.Data;
 import org.springframework.data.mongodb.core.mapping.Document;
 
 import javax.xml.bind.annotation.XmlRootElement;
-import java.util.Map;
 
 /**
  * 研究机构
@@ -16,7 +15,7 @@ import java.util.Map;
 @Document
 @ApiModel(value = "研究机构")
 @XmlRootElement
-public class Institution extends Base {
+public class Institution extends MarkError {
 
     @ApiModelProperty(value = "研究机构名称")
     private String name;
@@ -84,9 +83,4 @@ public class Institution extends Base {
     @ApiModelProperty(value = "出版物")
     private String publication;
 
-    @ApiModelProperty(value = "是否有错", hidden = true)
-    private Boolean hasError = false;
-
-    @ApiModelProperty(value = "标错", hidden = true)
-    private Map<String, Boolean> errorTag;
 }

@@ -13,9 +13,9 @@ import com.hiekn.china.aeronautical.service.DatasetService;
 import com.hiekn.china.aeronautical.service.PublisherService;
 import com.hiekn.china.aeronautical.service.TaskService;
 import com.hiekn.china.aeronautical.util.DataBeanUtils;
+import com.hiekn.china.aeronautical.util.HttpUtils;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
-import org.apache.commons.compress.utils.CharsetNames;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
@@ -129,15 +129,9 @@ public class PublisherRestApi {
                 publisherService.exportData(collectionName + "_" + key, output);
             }
         };
-        String fileName ="file";
-        try {
-            fileName= new String(dataset.getName().getBytes(CharsetNames.UTF_8), CharsetNames.ISO_8859_1);
-        }catch (Exception e) {
-
-        }
         return Response
                 .ok(fileStream, MediaType.APPLICATION_OCTET_STREAM)
-                .header("content-disposition", "attachment; filename = " + fileName + ".xlsx")
+                .header("content-disposition", "attachment; filename = " + HttpUtils.UTF_8toISO_8859_1(dataset.getName()) + ".xlsx")
                 .build();
     }
 

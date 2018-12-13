@@ -1,6 +1,6 @@
 package com.hiekn.china.aeronautical.model.bean;
 
-import com.hiekn.china.aeronautical.model.base.Base;
+import com.hiekn.china.aeronautical.model.base.MarkError;
 import io.swagger.annotations.ApiModel;
 import io.swagger.annotations.ApiModelProperty;
 import lombok.Data;
@@ -8,7 +8,6 @@ import org.hibernate.validator.constraints.NotBlank;
 import org.springframework.data.mongodb.core.mapping.Document;
 
 import javax.xml.bind.annotation.XmlRootElement;
-import java.util.Map;
 
 /**
  * 期刊
@@ -17,7 +16,7 @@ import java.util.Map;
 @Document
 @ApiModel(value = "期刊")
 @XmlRootElement
-public class Periodical extends Base {
+public class Periodical extends MarkError {
 
     @NotBlank(message = "期刊名不能为空")
     @ApiModelProperty(example = "期刊名称", value = "期刊名称")
@@ -89,9 +88,4 @@ public class Periodical extends Base {
     @ApiModelProperty(value = "收录情况")
     private String inclusionStatus;
 
-    @ApiModelProperty(value = "是否有错", hidden = true)
-    private Boolean hasError = false;
-
-    @ApiModelProperty(value = "标错", hidden = true)
-    private Map<String, Boolean> errorTag;
 }

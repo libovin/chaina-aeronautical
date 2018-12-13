@@ -30,6 +30,9 @@ public class Dataset extends Base {
     @Indexed(unique = true)
     private String typeKey;
 
+    @ApiModelProperty(hidden = true)
+    private Long count;
+
     @ApiModelProperty(example = "期刊数据集", value = "数据集名称")
     private String name;
 

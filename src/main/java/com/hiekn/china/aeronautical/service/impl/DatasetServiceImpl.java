@@ -21,10 +21,12 @@ import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Example;
 import org.springframework.data.mongodb.core.MongoTemplate;
+import org.springframework.data.mongodb.core.query.Query;
 import org.springframework.stereotype.Service;
 
 import java.io.File;
 import java.io.IOException;
+import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 
@@ -33,8 +35,10 @@ public class DatasetServiceImpl implements DatasetService {
 
     @Autowired
     private DatasetRepository datasetRepository;
+
     @Autowired
     private MongoTemplate mongoTemplate;
+
     @Autowired
     private ImportAsyncService importAsyncService;
 
@@ -43,7 +47,12 @@ public class DatasetServiceImpl implements DatasetService {
         Dataset targe = new Dataset();
         Map<String, Object> map = QueryUtils.trastation(bean, targe);
         Example<Dataset> example = Example.of((Dataset) map.get("bean"));
-        return new RestData<>(datasetRepository.findAll(example), datasetRepository.count(example));
+        List<Dataset> datasetList = datasetRepository.findAll(example);
+        for (Dataset dataset : datasetList) {
+            long count = mongoTemplate.count(new Query(), dataset.getTypeKey());
+            dataset.setCount(count);
+        }
+        return new RestData<>(datasetList, datasetRepository.count(example));
     }
 
     @Override
@@ -72,21 +81,29 @@ public class DatasetServiceImpl implements DatasetService {
     }
 
     @Override
-    public Dataset add(DatasetFile datesetFile) {
+    public Dataset add(DatasetFile datasetFile) {
         Dataset dataset = new Dataset();
-        dataset.setTable(datesetFile.getTable());
-        dataset.setKey(datesetFile.getKey());
-        dataset.setTypeKey(datesetFile.getTable() + "_" + datesetFile.getKey());
-        dataset.setName(datesetFile.getName());
+        dataset.setTable(datasetFile.getTable());
+        dataset.setKey(datasetFile.getKey());
+        dataset.setTypeKey(datasetFile.getTable() + "_" + datasetFile.getKey());
+        dataset.setName(datasetFile.getName());
         if (datasetRepository.existsDatasetByTypeKey(dataset.getTypeKey())) {
             throw RestException.newInstance(ErrorCodes.NAME_EXIST_ERROR);
         }
         Dataset dataset1 = datasetRepository.save(dataset);
-        if (datesetFile.getFileInfo() != null) {
+        mongoTemplate.createCollection(dataset1.getTypeKey());
+        if (datasetFile.getFileInfo() != null) {
             File file = new File("temp" + System.currentTimeMillis());
             try {
-                FileUtils.copyInputStreamToFile(datesetFile.getFileIn(), file);
-                importAsyncService.importExcelToDataset(getTableClass(dataset.getTable()), file, dataset.getTypeKey());
+                FileUtils.copyInputStreamToFile(datasetFile.getFileIn(), file);
+                String suffix = datasetFile.getFileInfo().getFileName();
+                if (suffix.endsWith(".xlsx")) {
+                    importAsyncService.importExcelToDataset(getTableClass(dataset.getTable()), file, dataset.getTypeKey());
+                } else if (suffix.endsWith(".xml")) {
+                    importAsyncService.importXmlToDataset(getTableClass(dataset.getTable()), file, dataset.getTypeKey());
+                }
+
+
             } catch (IOException e) {
                 e.printStackTrace();
             }

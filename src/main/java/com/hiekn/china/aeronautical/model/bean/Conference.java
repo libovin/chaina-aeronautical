@@ -1,6 +1,6 @@
 package com.hiekn.china.aeronautical.model.bean;
 
-import com.hiekn.china.aeronautical.model.base.Base;
+import com.hiekn.china.aeronautical.model.base.MarkError;
 import io.swagger.annotations.ApiModel;
 import io.swagger.annotations.ApiModelProperty;
 import lombok.Data;
@@ -8,13 +8,12 @@ import org.hibernate.validator.constraints.NotBlank;
 import org.springframework.data.mongodb.core.mapping.Document;
 
 import javax.xml.bind.annotation.XmlRootElement;
-import java.util.Map;
 
 @Data
 @Document
 @ApiModel(value = "会议")
 @XmlRootElement
-public class Conference extends Base {
+public class Conference extends MarkError {
 
     @NotBlank(message = "会议名不能为空")
     @ApiModelProperty(example = "2018年xxx会议", value = "会议名")
@@ -50,10 +49,5 @@ public class Conference extends Base {
     @ApiModelProperty(value = "专业分类")
     private String specialClassified;
 
-    @ApiModelProperty(value = "是否有错", hidden = true)
-    private Boolean hasError = false;
-
-    @ApiModelProperty(value = "标错", hidden = true)
-    private Map<String, Boolean> errorTag;
 
 }
