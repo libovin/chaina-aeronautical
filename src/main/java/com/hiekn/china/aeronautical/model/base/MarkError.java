@@ -12,5 +12,7 @@ public abstract class MarkError extends Base {
     private Boolean hasError;
 
     @ApiModelProperty(value = "标错", hidden = true)
-    private Map errorTag;
+    private Map hasErrorTag;
+
+//    private Map markErrorResult;
 }

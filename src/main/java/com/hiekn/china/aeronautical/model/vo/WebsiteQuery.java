@@ -13,4 +13,7 @@ public class WebsiteQuery extends PageQuery {
      */
     @ApiModelProperty(value = "网站名称")
     private String name;
+
+    @ApiModelProperty(value = "是否有错")
+    private Boolean hasError;
 }

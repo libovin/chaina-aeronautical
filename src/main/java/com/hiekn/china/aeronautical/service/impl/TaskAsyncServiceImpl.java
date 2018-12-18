@@ -18,11 +18,12 @@ import org.springframework.data.util.CloseableIterator;
 import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Service;
 
+import java.lang.reflect.Field;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 import java.util.concurrent.CompletableFuture;
-import java.util.concurrent.ConcurrentHashMap;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -60,7 +61,7 @@ public class TaskAsyncServiceImpl implements TaskAsyncService {
         int errorCount = 0;
         while (closeableIterator.hasNext()) {
             T obj = closeableIterator.next();
-            if (!checkSingle(obj, task.getTaskRule(), collectionName)) {
+            if (checkSingle(obj, task.getTaskRule(), collectionName)) {
                 errorCount++;
             }
             promote++;
@@ -72,28 +73,40 @@ public class TaskAsyncServiceImpl implements TaskAsyncService {
     }
 
     private <T extends MarkError> boolean checkSingle(T obj, List<Rule> rules, String collectionName) {
-        String id = obj.getId();
-        Map<String, Boolean> errorMap = new ConcurrentHashMap<>();
-        boolean hasError = true;
+        Map<String, Boolean> errorMap = new HashMap<>();
+        Map<String, Boolean> hasErrorMap = new HashMap<>();
+//        Map errorMessage = new HashMap<>();
+        boolean hasError = false;
         for (Rule rule : rules) {
+            Map c = new HashMap();
             String column = rule.getColumn();
             String columnValue = "";
             try {
-                columnValue = (String) obj.getClass().getField(column).get(obj);
+                Field field = obj.getClass().getDeclaredField(column);
+                field.setAccessible(true);
+                columnValue = (String) field.get(obj);
             } catch (Exception e) {
-
+                e.printStackTrace();
             }
             Pattern pattern = RuleUtils.instance.getRulePattern(rule.getId());
             Matcher matcher = pattern.matcher(columnValue);
             Boolean flag = matcher.matches();
-            hasError = flag & hasError;
+//            List msgList = (List) errorMessage.computeIfAbsent(column, key -> new ArrayList<>());
+//            c.put("column", column);
+//            c.put("value", columnValue);
+//            c.put("pattern", pattern.pattern());
+//            c.put("result", flag);
+//            msgList.add(c);
             errorMap.merge(column, flag, (a, b) -> a | b);
         }
-        obj.setErrorTag(errorMap);
-        if (!hasError) {
-            obj.setHasError(true);
-            mongoTemplate.save(obj, collectionName);
+        for (Map.Entry<String, Boolean> x : errorMap.entrySet()) {
+            hasError = hasError | !x.getValue();
+            hasErrorMap.put(x.getKey(), !x.getValue());
         }
+        obj.setHasError(hasError);
+        obj.setHasErrorTag(hasErrorMap);
+        // obj.setMarkErrorResult(errorMessage);
+        mongoTemplate.save(obj, collectionName);
         return hasError;
     }
 

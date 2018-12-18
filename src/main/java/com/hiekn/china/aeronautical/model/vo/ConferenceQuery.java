@@ -9,11 +9,6 @@ import lombok.*;
 @ApiModel
 public class ConferenceQuery extends PageQuery {
 
-    /**
-     * 会议名称、会议简称、会议届次、主办单位、专业分类
-     *
-     */
-
     @ApiModelProperty(example = "会议名称", value = "会议名称",dataType = "Object")
     private String name;
 
@@ -25,5 +20,8 @@ public class ConferenceQuery extends PageQuery {
 
     @ApiModelProperty(value = "专业分类")
     private String specialClassified;
+
+    @ApiModelProperty(value = "是否有错")
+    private Boolean hasError;
 
 }

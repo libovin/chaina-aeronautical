@@ -17,4 +17,7 @@ public class InstitutionQuery extends PageQuery {
 
     @ApiModelProperty(value = "研究领域")
     private String researchField;
+
+    @ApiModelProperty(value = "是否有错")
+    private Boolean hasError;
 }
