@@ -8,6 +8,7 @@ import com.hiekn.china.aeronautical.model.bean.Task;
 import com.hiekn.china.aeronautical.model.vo.ConferenceQuery;
 import com.hiekn.china.aeronautical.model.vo.FileImport;
 import com.hiekn.china.aeronautical.model.vo.TaskAdd;
+import com.hiekn.china.aeronautical.model.vo.WordMarkError;
 import com.hiekn.china.aeronautical.model.vo.WordStatQuery;
 import com.hiekn.china.aeronautical.service.ConferenceService;
 import com.hiekn.china.aeronautical.service.DatasetService;
@@ -111,6 +112,16 @@ public class ConferenceRestApi {
             @Valid WordStatQuery wordStatQuery,
             @PathParam("key") @DefaultValue("default") String key) {
         return new RestResp<>(conferenceService.wordStatistics(wordStatQuery, collectionName + "_" + key));
+    }
+
+    @ApiOperation("会议统计标错")
+    @POST
+    @Path("{key}/word/markerror")
+    @Consumes(MediaType.APPLICATION_JSON)
+    public RestResp<Integer> markerror(
+            @PathParam("key") @DefaultValue("default") String key,
+            WordMarkError wordMarkError) {
+        return new RestResp<>(conferenceService.wordMarkError(wordMarkError, collectionName + "_" + key));
     }
 
     @ApiOperation("导入数据集")

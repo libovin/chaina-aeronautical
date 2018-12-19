@@ -3,6 +3,7 @@ package com.hiekn.china.aeronautical.repository.custom.impl;
 import com.hiekn.china.aeronautical.model.vo.Result;
 import com.hiekn.china.aeronautical.model.vo.WordStatQuery;
 import com.hiekn.china.aeronautical.repository.custom.BaseRepositoryCustom;
+import com.mongodb.WriteResult;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Example;
 import org.springframework.data.domain.Page;
@@ -11,12 +12,16 @@ import org.springframework.data.mongodb.core.MongoTemplate;
 import org.springframework.data.mongodb.core.aggregation.AggregationResults;
 import org.springframework.data.mongodb.core.query.Criteria;
 import org.springframework.data.mongodb.core.query.Query;
+import org.springframework.data.mongodb.core.query.Update;
 import org.springframework.data.repository.support.PageableExecutionUtils;
 import org.springframework.util.Assert;
 
 import java.util.List;
 
-import static org.springframework.data.mongodb.core.aggregation.Aggregation.*;
+import static org.springframework.data.mongodb.core.aggregation.Aggregation.group;
+import static org.springframework.data.mongodb.core.aggregation.Aggregation.match;
+import static org.springframework.data.mongodb.core.aggregation.Aggregation.newAggregation;
+import static org.springframework.data.mongodb.core.aggregation.Aggregation.project;
 import static org.springframework.data.mongodb.core.query.Criteria.where;
 
 public class BaseRepositoryCustomImpl<T> implements BaseRepositoryCustom<T> {
@@ -59,5 +64,9 @@ public class BaseRepositoryCustomImpl<T> implements BaseRepositoryCustom<T> {
                                 .and("name").previousOperation()
                 ), collectionName, Result.class);
         return agg.getMappedResults();
+    }
+
+    public WriteResult updateMulti (Query query, Update update, String collectionName) {
+        return mongoTemplate.updateMulti(query,update,collectionName);
     }
 }

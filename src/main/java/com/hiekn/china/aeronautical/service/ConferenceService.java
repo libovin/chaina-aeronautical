@@ -4,6 +4,7 @@ import com.hiekn.boot.autoconfigure.base.model.result.RestData;
 import com.hiekn.china.aeronautical.model.bean.Conference;
 import com.hiekn.china.aeronautical.model.vo.ConferenceQuery;
 import com.hiekn.china.aeronautical.model.vo.FileImport;
+import com.hiekn.china.aeronautical.model.vo.WordMarkError;
 import com.hiekn.china.aeronautical.model.vo.WordStatQuery;
 import com.mongodb.WriteResult;
 
@@ -23,6 +24,8 @@ public interface ConferenceService {
     Conference add(Conference conference,String collectionName);
 
     RestData<Conference> wordStatistics(WordStatQuery wordStatQuery, String collectionName);
+
+    Integer wordMarkError(WordMarkError wordMarkError, String collectionName);
 
     Map<String, Object> importData(FileImport fileImport, String collectionName);
 

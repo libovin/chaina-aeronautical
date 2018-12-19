@@ -20,7 +20,6 @@ import java.util.List;
 import java.util.Set;
 
 import static org.springframework.data.mongodb.core.query.Criteria.where;
-import static org.springframework.data.mongodb.core.query.Query.query;
 
 
 public class ConferenceRepositoryImpl extends BaseRepositoryCustomImpl<Conference> implements ConferenceRepositoryCustom {
@@ -47,8 +46,9 @@ public class ConferenceRepositoryImpl extends BaseRepositoryCustomImpl<Conferenc
             key.add(r.getName());
             a = a.add(r.getCount());
         }
-        Pageable pageable = new PageRequest(wordStatQuery.getPageNo(), wordStatQuery.getPageSize());
-        List<Conference> list = mongoTemplate.find(query(where(wordStatQuery.getColumn()).in(key)).with(pageable), Conference.class, collectionName);
+        Pageable pageable = new PageRequest(wordStatQuery.getPageNo() - 1, wordStatQuery.getPageSize());
+        Query query = Query.query(where(wordStatQuery.getColumn()).in(key)).with(pageable);
+        List<Conference> list = mongoTemplate.find(query, Conference.class, collectionName);
         return new RestData<>(list, a.intValue());
     }
 

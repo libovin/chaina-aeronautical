@@ -45,7 +45,7 @@ public class PublisherRepositoryImpl extends BaseRepositoryCustomImpl<Publisher>
             key.add(r.getName());
             a = a.add(r.getCount());
         }
-        Pageable pageable = new PageRequest(wordStatQuery.getPageNo(), wordStatQuery.getPageSize());
+        Pageable pageable = new PageRequest(wordStatQuery.getPageNo() - 1, wordStatQuery.getPageSize());
         List<Publisher> list =  mongoTemplate.find(query(where(wordStatQuery.getColumn()).in(key)).with(pageable), Publisher.class, collectionName);
         return new RestData<>(list,a.intValue());
     }

@@ -4,6 +4,7 @@ import com.hiekn.boot.autoconfigure.base.model.result.RestData;
 import com.hiekn.china.aeronautical.model.bean.Conference;
 import com.hiekn.china.aeronautical.model.vo.ConferenceQuery;
 import com.hiekn.china.aeronautical.model.vo.FileImport;
+import com.hiekn.china.aeronautical.model.vo.WordMarkError;
 import com.hiekn.china.aeronautical.model.vo.WordStatQuery;
 import com.hiekn.china.aeronautical.repository.ConferenceRepository;
 import com.hiekn.china.aeronautical.service.ConferenceService;
@@ -23,12 +24,16 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
+import org.springframework.data.mongodb.core.query.Criteria;
+import org.springframework.data.mongodb.core.query.Query;
+import org.springframework.data.mongodb.core.query.Update;
 import org.springframework.data.util.CloseableIterator;
 import org.springframework.stereotype.Service;
 
 import java.io.File;
 import java.io.IOException;
 import java.io.OutputStream;
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -78,6 +83,13 @@ public class ConferenceServiceImpl implements ConferenceService {
 
     public RestData<Conference> wordStatistics(WordStatQuery wordStatQuery, String collectionName) {
         return conferenceRepository.wordStatistics(wordStatQuery, collectionName);
+    }
+
+    public Integer wordMarkError(WordMarkError wordMarkError, String collectionName) {
+        Query query = Query.query(Criteria.where("_id").in(Arrays.asList(wordMarkError.getIds().split(","))));
+        Update update =Update.update("hasError",true).set("hasErrorTag."+wordMarkError.getColumn(), true);
+        WriteResult writeResult = conferenceRepository.updateMulti(query,update,collectionName);
+        return writeResult.getN();
     }
 
     public Map<String, Object> importData(FileImport fileImport, String collectionName) {

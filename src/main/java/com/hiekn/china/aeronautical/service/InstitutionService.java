@@ -4,6 +4,7 @@ import com.hiekn.boot.autoconfigure.base.model.result.RestData;
 import com.hiekn.china.aeronautical.model.bean.Institution;
 import com.hiekn.china.aeronautical.model.vo.FileImport;
 import com.hiekn.china.aeronautical.model.vo.InstitutionQuery;
+import com.hiekn.china.aeronautical.model.vo.WordMarkError;
 import com.hiekn.china.aeronautical.model.vo.WordStatQuery;
 import com.mongodb.WriteResult;
 
@@ -23,6 +24,8 @@ public interface InstitutionService {
     Institution add(Institution institution,String collectionName);
 
     RestData<Institution> wordStatistics(WordStatQuery wordStatQuery,String collectionName);
+
+    Integer wordMarkError(WordMarkError wordMarkError, String collectionName);
 
     Map<String, Object> importData(FileImport fileImport, String collectionName);
 
