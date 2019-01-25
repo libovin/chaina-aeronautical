@@ -2,6 +2,7 @@ package com.hiekn.china.aeronautical.service.impl;
 
 import com.hiekn.boot.autoconfigure.base.model.result.RestData;
 import com.hiekn.china.aeronautical.model.bean.Dict;
+import com.hiekn.china.aeronautical.model.vo.DictFileImport;
 import com.hiekn.china.aeronautical.model.vo.DictQuery;
 import com.hiekn.china.aeronautical.repository.DictRepository;
 import com.hiekn.china.aeronautical.service.DictService;
@@ -12,6 +13,10 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Example;
 import org.springframework.stereotype.Service;
 
+import java.io.BufferedReader;
+import java.io.IOException;
+import java.io.InputStreamReader;
+import java.util.LinkedHashSet;
 import java.util.Map;
 
 @Service("dictService")
@@ -39,15 +44,38 @@ public class DictServiceImpl implements DictService {
     }
 
     @Override
-    public Dict modify(String id, Dict dataset) {
+    public Dict modify(String id, Dict dict) {
         Dict targe = dictRepository.findOne(id);
-        String[] stringArr = DataBeanUtils.getNullProperty(dataset);
-        BeanUtils.copyProperties(dataset, targe, stringArr);
+        String[] stringArr = DataBeanUtils.getNullProperty(dict);
+        BeanUtils.copyProperties(dict, targe, stringArr);
         return dictRepository.save(targe);
     }
 
     @Override
-    public Dict add(Dict dataset) {
-        return dictRepository.save(dataset);
+    public Dict add(Dict dict) {
+        return dictRepository.save(dict);
     }
+
+    @Override
+    public Dict importDict(DictFileImport fileImport) {
+        Dict dict = new Dict();
+        dict.setTable(fileImport.getTable());
+        dict.setColumn(fileImport.getColumn());
+        dict.setKey(fileImport.getKey());
+        dict.setName(fileImport.getName());
+        InputStreamReader isr = new InputStreamReader(fileImport.getFileIn());
+        LinkedHashSet<String> set = new LinkedHashSet<>();
+        try (BufferedReader bufferedReader = new BufferedReader(isr)) {
+            String line = null;
+            while((line = bufferedReader.readLine())!=null){
+                set.add(line);
+            }
+        }catch (IOException e) {
+            e.printStackTrace();
+        }
+        dict.setText(set);
+        return dictRepository.save(dict);
+    }
+
+
 }

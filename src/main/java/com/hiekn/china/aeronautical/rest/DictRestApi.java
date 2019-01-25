@@ -3,6 +3,7 @@ package com.hiekn.china.aeronautical.rest;
 import com.hiekn.boot.autoconfigure.base.model.result.RestData;
 import com.hiekn.boot.autoconfigure.base.model.result.RestResp;
 import com.hiekn.china.aeronautical.model.bean.Dict;
+import com.hiekn.china.aeronautical.model.vo.DictFileImport;
 import com.hiekn.china.aeronautical.model.vo.DictQuery;
 import com.hiekn.china.aeronautical.service.DictService;
 import io.swagger.annotations.Api;
@@ -11,6 +12,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 import javax.validation.Valid;
+import javax.ws.rs.BeanParam;
 import javax.ws.rs.Consumes;
 import javax.ws.rs.DELETE;
 import javax.ws.rs.GET;
@@ -65,6 +67,14 @@ public class DictRestApi {
     @Path("add")
     public RestResp<Dict> add(@Valid Dict dict) {
         return new RestResp<>(dictService.add(dict));
+    }
+
+    @ApiOperation("导入字典")
+    @POST
+    @Path("import")
+    @Consumes(MediaType.MULTIPART_FORM_DATA)
+    public RestResp<Dict> importDict(@BeanParam DictFileImport fileImport) {
+        return new RestResp<>(dictService.importDict(fileImport));
     }
 
 }
