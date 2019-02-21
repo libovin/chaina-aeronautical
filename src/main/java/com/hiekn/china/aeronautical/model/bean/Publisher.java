@@ -15,7 +15,7 @@ import javax.xml.bind.annotation.XmlRootElement;
 @XmlRootElement
 public class Publisher extends MarkError {
 
-    @ApiModelProperty(value = "出版物单位名称")
+    @ApiModelProperty(value = "出版单位名称")
     private String name;
 
     @ApiModelProperty(value = "出版单位前缀")

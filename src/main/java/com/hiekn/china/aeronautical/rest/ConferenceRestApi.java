@@ -61,8 +61,8 @@ public class ConferenceRestApi {
     @POST
     @Path("{key}/list")
     public RestResp<RestData<Conference>> findAll(
-            @Valid ConferenceQuery conferenceQuery,
-            @PathParam("key") @DefaultValue("default") String key) {
+            @PathParam("key") @DefaultValue("default") String key,
+            @Valid ConferenceQuery conferenceQuery) {
         return new RestResp<>(conferenceService.findAll(conferenceQuery, collectionName + "_" + key));
     }
 
@@ -90,9 +90,9 @@ public class ConferenceRestApi {
     @Path("{key}/{id}")
     @Consumes(MediaType.APPLICATION_JSON)
     public RestResp<Conference> modify(
+            @PathParam("key") @DefaultValue("default") String key,
             @PathParam("id") String id,
-            @Valid Conference conference,
-            @PathParam("key") @DefaultValue("default") String key) {
+            @Valid Conference conference) {
         return new RestResp<>(conferenceService.modify(id, conference, collectionName + "_" + key));
     }
 

@@ -1,5 +1,7 @@
 package com.hiekn.china.aeronautical;
 
-public class Test {
+public interface Test {
+
+    int test(int i);
 
 }
