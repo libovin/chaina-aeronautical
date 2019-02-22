@@ -28,7 +28,7 @@ public class KnowledgeConfig {
     public MongoClient kgMongoClient() {
         ServerAddress serverAddress = new ServerAddress(host, port);
         MongoClientOptions options = MongoClientOptions.builder()
-                .connectionsPerHost(100)
+                .connectionsPerHost(10)
                 .socketTimeout(30000)
                 .connectTimeout(3000)
                 .build();
@@ -49,6 +49,6 @@ public class KnowledgeConfig {
     @Qualifier
     @Bean(name = "kgAttrDefineMongoTemplate")
     public MongoTemplate kgAttrDefineMongoTemplate(MongoTemplateUtils mongoTemplateUtils) {
-        return mongoTemplateUtils.getMongoTemplate(KG_ATTRIBUTE_DEFINITION);
+        return mongoTemplateUtils.template(KG_ATTRIBUTE_DEFINITION);
     }
 }

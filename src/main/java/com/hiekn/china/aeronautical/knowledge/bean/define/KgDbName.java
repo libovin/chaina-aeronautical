@@ -1,4 +1,4 @@
-package com.hiekn.china.aeronautical.knowledge.bean;
+package com.hiekn.china.aeronautical.knowledge.bean.define;
 
 import lombok.Data;
 import org.springframework.data.annotation.Id;

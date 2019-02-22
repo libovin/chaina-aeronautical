@@ -1,4 +1,4 @@
-package com.hiekn.china.aeronautical.knowledge.bean;
+package com.hiekn.china.aeronautical.knowledge.bean.define;
 
 import lombok.Data;
 import org.springframework.data.annotation.Id;
@@ -9,7 +9,9 @@ import org.springframework.data.mongodb.core.mapping.Field;
 @Document
 public class AttributeDefinition {
     @Id
-    private String id;
+    private String objId;
+
+    private Integer id;
 
     private String name;
 
@@ -37,8 +39,7 @@ public class AttributeDefinition {
     @Field("modify_time")
     private String modifyTime;
 
-    @Field("id")
-    private Integer beanId;
+
 
     @Field("range_value")
     private String rangeValue;

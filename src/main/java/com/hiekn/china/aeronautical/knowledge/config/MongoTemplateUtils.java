@@ -17,7 +17,7 @@ public class MongoTemplateUtils {
         this.kgMongoClient = kgMongoClient;
     }
 
-    public MongoTemplate getMongoTemplate(String databaseName) {
+    public MongoTemplate template(String databaseName) {
         return map.computeIfAbsent(databaseName, (k) -> new MongoTemplate(kgMongoClient, databaseName));
     }
 }

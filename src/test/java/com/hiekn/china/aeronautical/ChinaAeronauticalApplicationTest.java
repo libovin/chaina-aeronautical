@@ -1,7 +1,7 @@
 package com.hiekn.china.aeronautical;
 
 import com.hiekn.china.aeronautical.knowledge.BaseKnowledgeService;
-import com.hiekn.china.aeronautical.knowledge.bean.AttributeDefinition;
+import com.hiekn.china.aeronautical.knowledge.bean.database.BasicInfo;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -21,6 +21,7 @@ public class ChinaAeronauticalApplicationTest {
 
     @Test
     public void contextLoads() {
-        List<AttributeDefinition> attributeDefinitionList = baseKnowledgeService.getAttributeDefinitionList(KG_DB_NAME);
+//        List<AttributeDefinition> attributeDefinitionList = baseKnowledgeService.getAttr(KG_DB_NAME,1L);
+        List<BasicInfo> x=  baseKnowledgeService.getBaseInfoList(KG_DB_NAME);
     }
 }
