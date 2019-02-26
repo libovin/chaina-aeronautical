@@ -12,8 +12,9 @@ public class InstitutionKgService {
     @Autowired
     private KgBaseService kgBaseService;
 
-
     public Institution findOne(String kgName, Long id) {
         return kgBaseService.findOne(kgName, schema, id, Institution.class);
     }
+
+
 }

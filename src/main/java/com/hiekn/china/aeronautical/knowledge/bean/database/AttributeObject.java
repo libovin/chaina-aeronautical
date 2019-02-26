@@ -14,18 +14,21 @@ public class AttributeObject {
     @Id
     private String id;
 
-    @Field(value = "entity_id", order = 2)
+    @Field(value = "entity_id")
     private Long entityId;
-    @Field(value = "entity_type", order = 3)
+
+    @Field(value = "entity_type")
     private Long entityType;
 
-    @Field(value = "attr_id", order = 4)
+    @Field(value = "attr_id")
     private Integer attrId;
-    @Field(value = "attr_value_type", order = 5)
+
+    @Field(value = "attr_value_type")
     private String attrValueType;
-    @Field(value = "attr_value", order = 6)
+
+    @Field(value = "attr_value")
     private Long attrValue;
 
-    @Field(value = "meta_data", order = 7)
+    @Field(value = "meta_data")
     private Map metaData;
 }

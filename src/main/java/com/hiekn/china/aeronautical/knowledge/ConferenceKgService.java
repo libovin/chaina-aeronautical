@@ -22,4 +22,22 @@ public class ConferenceKgService {
     public List<Conference> find(String kgName, Pageable pageable) {
         return kgBaseService.find(kgName, schema, pageable, Conference.class);
     }
+
+    public Long count(String kgName) {
+        return kgBaseService.count(kgName, schema);
+    }
+
+
+    public void delete(String kgName, Long id) {
+        kgBaseService.delete(kgName, schema, id);
+    }
+
+    public void insert(String kgName, Conference conference) {
+        kgBaseService.insert(kgName,schema,conference);
+    }
+
+    public void modify(String kgName, Conference conference) {
+
+    }
+
 }
