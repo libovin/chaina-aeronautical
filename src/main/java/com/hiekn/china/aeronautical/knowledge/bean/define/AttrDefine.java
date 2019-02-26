@@ -7,7 +7,7 @@ import org.springframework.data.mongodb.core.mapping.Field;
 
 @Data
 @Document
-public class AttributeDefinition {
+public class AttrDefine {
     @Id
     private String objId;
 
@@ -39,7 +39,12 @@ public class AttributeDefinition {
     @Field("modify_time")
     private String modifyTime;
 
+    @Field("additional_info")
+    private String additionalInfo;
 
+    private String alias;
+
+    private String dt;
 
     @Field("range_value")
     private String rangeValue;

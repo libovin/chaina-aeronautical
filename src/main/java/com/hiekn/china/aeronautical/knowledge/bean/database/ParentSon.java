@@ -13,9 +13,9 @@ public class ParentSon {
     @Id
     private String id;
 
-    private String parent;
+    private Long parent;
 
-    private String son;
+    private Long son;
 
     @Field("meta_data")
     private Map metaData;

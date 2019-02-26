@@ -5,7 +5,7 @@ import com.mongodb.MongoClientOptions;
 import com.mongodb.ServerAddress;
 import lombok.Data;
 import org.springframework.beans.factory.annotation.Qualifier;
-import org.springframework.boot.context.properties.ConfigurationProperties;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Primary;
@@ -15,11 +15,12 @@ import org.springframework.data.mongodb.core.convert.MappingMongoConverter;
 
 @Data
 @Configuration
-@ConfigurationProperties(prefix = "spring.data.mongodb")
 public class KnowledgeConfig {
 
+    @Value("spring.data.mongodb.port")
     private Integer port;
 
+    @Value("spring.data.mongodb.host")
     private String host;
 
     private static String KG_ATTRIBUTE_DEFINITION = "kg_attribute_definition";

@@ -12,7 +12,7 @@ import java.util.Map;
 public class BasicInfo {
 
     @Id
-    private String id;
+    private Long id;
 
     private String name;
 
