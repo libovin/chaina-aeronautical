@@ -17,4 +17,12 @@ public class AttributeSummary {
 
     @Field("attr_id")
     private Integer attrId;
+
+    public AttributeSummary() {
+    }
+
+    public AttributeSummary(Long entityId, Integer attrId) {
+        this.entityId = entityId;
+        this.attrId = attrId;
+    }
 }

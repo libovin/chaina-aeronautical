@@ -22,4 +22,13 @@ public class ConceptInstance {
 
     @Field("meta_data")
     private Map metaData;
+
+    public ConceptInstance() {
+    }
+
+    public ConceptInstance(Long conceptId, Long insId, Map metaData) {
+        this.conceptId = conceptId;
+        this.insId = insId;
+        this.metaData = metaData;
+    }
 }

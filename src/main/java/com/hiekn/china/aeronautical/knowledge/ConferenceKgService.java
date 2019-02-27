@@ -33,11 +33,11 @@ public class ConferenceKgService {
     }
 
     public void insert(String kgName, Conference conference) {
-        kgBaseService.insert(kgName,schema,conference);
+        kgBaseService.insert(kgName, schema, conference);
     }
 
-    public void modify(String kgName, Conference conference) {
-
+    public void modify(String kgName, Long id, Conference conference) {
+        kgBaseService.modify(kgName, schema, id, conference);
     }
 
 }

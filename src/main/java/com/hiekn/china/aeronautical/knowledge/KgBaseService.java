@@ -11,6 +11,7 @@ import com.hiekn.china.aeronautical.knowledge.bean.define.AttrDefine;
 import com.hiekn.china.aeronautical.knowledge.bean.define.KgDbName;
 import com.hiekn.china.aeronautical.knowledge.config.MongoTemplateUtils;
 import com.hiekn.china.aeronautical.model.base.MarkError;
+import com.hiekn.china.aeronautical.util.DateUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.cglib.beans.BeanMap;
@@ -18,6 +19,7 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
 import org.springframework.data.mongodb.core.MongoTemplate;
 import org.springframework.data.mongodb.core.query.Query;
+import org.springframework.data.mongodb.core.query.Update;
 import org.springframework.stereotype.Service;
 
 import javax.annotation.PostConstruct;
@@ -50,7 +52,19 @@ public class KgBaseService {
     /**
      * 数据库概览定义结尾
      */
-    private final static String ATTR_SUFFIX = "_attribute_definition";
+    public static final String ATTR_SUFFIX = "_attribute_definition";
+    public static final String DOMAIN_VALUE = "domain_value";
+    public static final String PARENT = "parent";
+    public static final String OBJ_ID = "_id";
+    public static final String MEANING_TAG = "meaning_tag";
+    public static final String CONCEPT_ID = "concept_id";
+    public static final String ENTITY_TYPE = "entity_type";
+    public static final String ENTITY_ID = "entity_id";
+    public static final String INS_ID = "ins_id";
+    public static final String ID = "id";
+    public static final String META_DATA = "meta_data";
+    public static final String ATTR_VALUE = "attr_value";
+    public static final String ATTR_ID = "attr_id";
 
     @PostConstruct
     void init() {
@@ -62,7 +76,7 @@ public class KgBaseService {
 
     private List<AttrDefine> attrDefineList(String kgName, String schema) {
         String collectionName = this.kgNameMap.get(kgName) + ATTR_SUFFIX;
-        return kgAttrDefineMongoTemplate.find(query(where("domain_value").is(schemaId(kgName, schema))), AttrDefine.class, collectionName);
+        return kgAttrDefineMongoTemplate.find(query(where(DOMAIN_VALUE).is(schemaId(kgName, schema))), AttrDefine.class, collectionName);
     }
 
     private MongoTemplate template(String kgName) {
@@ -94,7 +108,7 @@ public class KgBaseService {
 
     private List<Long> schemaIds(String kgName) {
         MongoTemplate mongoTemplate = template(kgName);
-        List<ParentSon> parenSonList = mongoTemplate.find(new Query(where("parent").is(0)), ParentSon.class);
+        List<ParentSon> parenSonList = mongoTemplate.find(new Query(where(PARENT).is(0)), ParentSon.class);
         List<Long> idList = new ArrayList<>();
         for (ParentSon parentSon : parenSonList) {
             idList.add(parentSon.getSon());
@@ -113,15 +127,15 @@ public class KgBaseService {
 
     private BasicInfo getBaseInfo(String kgName, String schema, List<Long> list) {
         MongoTemplate mongoTemplate = template(kgName);
-        Query query = Query.query(where("_id").in(list))
-                .addCriteria(where("meaning_tag").is(schema));
+        Query query = Query.query(where(OBJ_ID).in(list))
+                .addCriteria(where(MEANING_TAG).is(schema));
         return mongoTemplate.findOne(query, BasicInfo.class);
     }
 
 
     private List<Long> entityIds(String kgName, String schema, Pageable pageable) {
         MongoTemplate mongoTemplate = template(kgName);
-        Query query = Query.query(where("concept_id").is(schemaId(kgName, schema))).with(pageable);
+        Query query = Query.query(where(CONCEPT_ID).is(schemaId(kgName, schema))).with(pageable);
         List<ConceptInstance> list = mongoTemplate.find(query, ConceptInstance.class);
         List<Long> entityIds = new ArrayList<>();
         for (ConceptInstance instance : list) {
@@ -132,12 +146,12 @@ public class KgBaseService {
 
     private List<AttributeString> attrString(String kgName, Long id) {
         MongoTemplate mongoTemplate = template(kgName);
-        return mongoTemplate.find(Query.query(where("entity_id").is(id)), AttributeString.class);
+        return mongoTemplate.find(Query.query(where(ENTITY_ID).is(id)), AttributeString.class);
     }
 
     private List<AttributeString> attrString(String kgName, List<Long> ids) {
         MongoTemplate mongoTemplate = template(kgName);
-        return mongoTemplate.find(Query.query(where("entity_id").in(ids)), AttributeString.class);
+        return mongoTemplate.find(Query.query(where(ENTITY_ID).in(ids)), AttributeString.class);
     }
 
     private <T extends MarkError> T mapToEntity(Map<String, Object> map, Class<T> clz) {
@@ -200,13 +214,13 @@ public class KgBaseService {
 
     public Long count(String kgName, String schema) {
         MongoTemplate mongoTemplate = template(kgName);
-        Query query = Query.query(where("concept_id").is(schemaId(kgName, schema)));
+        Query query = Query.query(where(CONCEPT_ID).is(schemaId(kgName, schema)));
         return mongoTemplate.count(query, ConceptInstance.class);
     }
 
     private Long maxId(String kgName) {
         MongoTemplate mongoTemplate = template(kgName);
-        Query query = new Query().with(new Sort(Sort.Direction.DESC, "_id")).limit(1);
+        Query query = new Query().with(new Sort(Sort.Direction.DESC, OBJ_ID)).limit(1);
         BasicInfo basicInfo = mongoTemplate.findOne(query, BasicInfo.class);
         return basicInfo.getId();
     }
@@ -214,26 +228,58 @@ public class KgBaseService {
     public <T extends MarkError> void insert(String kgName, String schema, T entity) {
         MongoTemplate mongoTemplate = template(kgName);
         Long entityId = maxId(kgName) + 1;
+        Long conceptId = schemaId(kgName, schema);
+        BeanMap beanMap = BeanMap.create(entity);
+        String name = null;
+        Map metaData = new HashMap<>();
+        metaData.put(META_DATA + "_2", DateUtils.getCurrentDateTime());
+        for (Object key : beanMap.keySet()) {
+            Map<String, AttrDefine> map = attrDefineNameMap(kgName, schema);
+            AttrDefine attrDefine = map.get(key);
+            if (attrDefine != null) {
+                Integer dataType = attrDefine.getDataType();
+                Integer attrId = attrDefine.getId();
+                String value = (String) beanMap.get(key);
+                if (value != null) {
+                    mongoTemplate.save(new AttributeSummary(entityId, attrId));
+                    mongoTemplate.save(new AttributeString(entityId, attrId, conceptId, value, metaData));
+                }
+            }
+            if ("name".equals(key)) {
+                name = (String) beanMap.get(key);
+            }
+        }
+        mongoTemplate.save(new BasicInfo(entityId, name, metaData));
+        mongoTemplate.save(new EntityId(entityId, name, conceptId, metaData));
+        mongoTemplate.save(new ConceptInstance(conceptId, entityId, metaData));
+    }
+
+    public <T extends MarkError> void modify(String kgName, String schema, Long entityId, T entity) {
+        MongoTemplate mongoTemplate = template(kgName);
+        Long conceptId = schemaId(kgName, schema);
         BeanMap beanMap = BeanMap.create(entity);
         for (Object key : beanMap.keySet()) {
             Map<String, AttrDefine> map = attrDefineNameMap(kgName, schema);
             AttrDefine attrDefine = map.get(key);
-            System.out.println(key);
-            if(attrDefine != null) {
-                Integer integer = attrDefine.getDataType();
-                Object value = beanMap.get(key);
+            if (attrDefine != null) {
+                Integer dataType = attrDefine.getDataType();
+                Integer attrId = attrDefine.getId();
+                String value = beanMap.get(key) != null ? (String) beanMap.get(key) : "";
+                Query query = Query.query(where(ENTITY_ID).is(entityId).and(ATTR_ID).is(attrId).and(ENTITY_TYPE).is(conceptId));
+                Update update = Update.update(ATTR_VALUE, value);
+                mongoTemplate.updateFirst(query, update, AttributeString.class);
             }
         }
     }
 
     public void delete(String kgName, String schema, Long id) {
         MongoTemplate mongoTemplate = template(kgName);
-        mongoTemplate.remove(Query.query(where("entity_id").is(id).and("entity_type").is(schemaId(kgName, schema))), AttributeObject.class);
-        mongoTemplate.remove(Query.query(where("entity_id").is(id).and("entity_type").is(schemaId(kgName, schema))), AttributeString.class);
-        mongoTemplate.remove(Query.query(where("entity_id").is(id)), AttributeSummary.class);
-        mongoTemplate.remove(Query.query(where("ins_id").is(id).and("concept_id").is(schemaId(kgName, schema))), ConceptInstance.class);
-        mongoTemplate.remove(Query.query(where("id").is(id).and("concept_id").is(schemaId(kgName, schema))), EntityId.class);
-        mongoTemplate.remove(Query.query(where("_id").is(id)), BasicInfo.class);
+        mongoTemplate.remove(Query.query(where(ENTITY_ID).is(id).and(ENTITY_TYPE).is(schemaId(kgName, schema))), AttributeObject.class);
+        mongoTemplate.remove(Query.query(where(ENTITY_ID).is(id).and(ENTITY_TYPE).is(schemaId(kgName, schema))), AttributeString.class);
+        mongoTemplate.remove(Query.query(where(ENTITY_ID).is(id)), AttributeSummary.class);
+        mongoTemplate.remove(Query.query(where(INS_ID).is(id).and(CONCEPT_ID).is(schemaId(kgName, schema))), ConceptInstance.class);
+        mongoTemplate.remove(Query.query(where(ID).is(id).and(CONCEPT_ID).is(schemaId(kgName, schema))), EntityId.class);
+        mongoTemplate.remove(Query.query(where(OBJ_ID).is(id)), BasicInfo.class);
     }
 
 
@@ -245,11 +291,11 @@ public class KgBaseService {
 
     public List<AttributeSummary> attributeSummary(String kgName, Long id) {
         MongoTemplate mongoTemplate = template(kgName);
-        return mongoTemplate.find(new Query(where("entity_id").is(id)), AttributeSummary.class);
+        return mongoTemplate.find(new Query(where(ENTITY_ID).is(id)), AttributeSummary.class);
     }
 
     public List<AttributeSummary> attributeSummary(String kgName, List<Long> ids) {
         MongoTemplate mongoTemplate = template(kgName);
-        return mongoTemplate.find(new Query(where("entity_id").in(ids)), AttributeSummary.class);
+        return mongoTemplate.find(new Query(where(ENTITY_ID).in(ids)), AttributeSummary.class);
     }
 }

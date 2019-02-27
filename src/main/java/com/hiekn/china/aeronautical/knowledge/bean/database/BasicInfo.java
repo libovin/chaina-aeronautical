@@ -23,4 +23,13 @@ public class BasicInfo {
 
     @Field("meta_data")
     private Map metaData;
+
+    public BasicInfo() {
+    }
+
+    public BasicInfo(Long id, String name, Map metaData) {
+        this.id = id;
+        this.name = name;
+        this.metaData = metaData;
+    }
 }

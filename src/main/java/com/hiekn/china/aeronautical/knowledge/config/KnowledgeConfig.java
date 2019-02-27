@@ -36,8 +36,8 @@ public class KnowledgeConfig {
     }
 
     @Bean
-    public MongoTemplateUtils mongoTemplateUtils(MongoClient kgMongoClient) {
-        return new MongoTemplateUtils(kgMongoClient);
+    public MongoTemplateUtils mongoTemplateUtils(MongoClient kgMongoClient,MappingMongoConverter mappingMongoConverter) {
+        return new MongoTemplateUtils(kgMongoClient,mappingMongoConverter);
     }
 
     @Primary
