@@ -32,9 +32,8 @@ public class KgDbInfoRestApi {
     private KgDbInfoService kgDbInfoService;
 
     @ApiOperation("图谱列表")
-    @POST
+    @GET
     @Path("list")
-    @Deprecated
     public RestResp<RestData<KgDbInfo>> findAll() {
         return new RestResp<>(kgDbInfoService.findAll());
     }
@@ -42,7 +41,6 @@ public class KgDbInfoRestApi {
     @ApiOperation("图谱详情")
     @GET
     @Path("{id}")
-    @Deprecated
     public RestResp<KgDbInfo> findOne(@PathParam("id") String id) {
         return new RestResp<>(kgDbInfoService.findOne(id));
     }
@@ -50,7 +48,6 @@ public class KgDbInfoRestApi {
     @ApiOperation("删除图谱")
     @DELETE
     @Path("{id}")
-    @Deprecated
     public RestResp delete(@PathParam("id") String id) {
         kgDbInfoService.delete(id);
         return new RestResp<>();
@@ -60,7 +57,6 @@ public class KgDbInfoRestApi {
     @PUT
     @Path("{id}")
     @Consumes(MediaType.APPLICATION_JSON)
-    @Deprecated
     public RestResp<KgDbInfo> modify(@PathParam("id") String id, @Valid KgDbInfo kgDbInfo) {
         return new RestResp<>(kgDbInfoService.modify(id, kgDbInfo));
     }
@@ -68,7 +64,6 @@ public class KgDbInfoRestApi {
     @ApiOperation("新增图谱")
     @POST
     @Path("/")
-    @Deprecated
     public RestResp<KgDbInfo> add(@Valid KgDbInfo kgDbInfo) {
         return new RestResp<>(kgDbInfoService.add(kgDbInfo));
     }

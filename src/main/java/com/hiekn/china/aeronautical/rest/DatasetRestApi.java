@@ -8,7 +8,6 @@ import com.hiekn.china.aeronautical.model.vo.DatasetQuery;
 import com.hiekn.china.aeronautical.service.DatasetService;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
-import lombok.extern.java.Log;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
@@ -28,7 +27,7 @@ import javax.ws.rs.core.MediaType;
 @Path("dataset")
 @Api("数据集")
 @Produces(MediaType.APPLICATION_JSON)
-@Log
+@Deprecated
 public class DatasetRestApi {
 
     @Autowired
