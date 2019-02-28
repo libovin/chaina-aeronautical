@@ -112,10 +112,6 @@ public class WebsiteServiceImpl implements WebsiteService {
         return map;
     }
 
-    public List<Map<String, Object>> checkStat(String key) {
-
-        return null;
-    }
 
     public void exportData(String collectionName, OutputStream output) {
         try {

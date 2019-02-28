@@ -2,6 +2,7 @@ package com.hiekn.china.aeronautical.rest;
 
 import com.hiekn.boot.autoconfigure.base.model.result.RestData;
 import com.hiekn.boot.autoconfigure.base.model.result.RestResp;
+import com.hiekn.china.aeronautical.knowledge.WebsiteKgService;
 import com.hiekn.china.aeronautical.model.bean.Dataset;
 import com.hiekn.china.aeronautical.model.bean.Task;
 import com.hiekn.china.aeronautical.model.bean.Website;
@@ -26,6 +27,7 @@ import javax.ws.rs.Consumes;
 import javax.ws.rs.DELETE;
 import javax.ws.rs.DefaultValue;
 import javax.ws.rs.GET;
+import javax.ws.rs.HeaderParam;
 import javax.ws.rs.POST;
 import javax.ws.rs.PUT;
 import javax.ws.rs.Path;
@@ -47,6 +49,9 @@ import java.util.Map;
 public class WebsiteRestApi {
 
     @Autowired
+    private WebsiteKgService websiteKgService;
+
+    @Autowired
     private WebsiteService websiteService;
 
     @Autowired
@@ -61,6 +66,7 @@ public class WebsiteRestApi {
     @POST
     @Path("{key}/list")
     public RestResp<RestData<Website>> findAll(@Valid WebsiteQuery websiteQuery,
+                                               @HeaderParam("kgName") String kgName,
                                                   @PathParam("key") @DefaultValue("default") String key) {
         return new RestResp<>(websiteService.findAll(websiteQuery, collectionName + "_" + key));
     }
@@ -68,16 +74,19 @@ public class WebsiteRestApi {
     @ApiOperation("网站详情")
     @GET
     @Path("{key}/{id}")
-    public RestResp<Website> findOne(@PathParam("id") String id,
+    public RestResp<Website> findOne(@PathParam("id") Long id,
+                                     @HeaderParam("kgName") String kgName,
                             @PathParam("key") @DefaultValue("default") String key) {
-        return new RestResp<>(websiteService.findOne(id, collectionName + "_" + key));
+        return new RestResp<>(websiteKgService.findOne(kgName, id));
     }
 
     @ApiOperation("删除网站")
     @DELETE
     @Path("{key}/{id}")
-    public RestResp delete(@PathParam("id") String id, @PathParam("key") @DefaultValue("default") String key) {
-        websiteService.delete(id, collectionName + "_" + key);
+    public RestResp delete(@PathParam("id") Long id,
+                           @HeaderParam("kgName") String kgName,
+                           @PathParam("key") @DefaultValue("default") String key) {
+        websiteKgService.delete(kgName, id);
         return new RestResp<>();
     }
 
@@ -85,18 +94,20 @@ public class WebsiteRestApi {
     @PUT
     @Path("{key}/{id}")
     @Consumes(MediaType.APPLICATION_JSON)
-    public RestResp<Website> modify(@PathParam("id") String id,
+    public RestResp<Website> modify(@PathParam("id") Long id,
+                                    @HeaderParam("kgName") String kgName,
                                        @PathParam("key") @DefaultValue("default") String key,
                                        @Valid Website website) {
-        return new RestResp<>(websiteService.modify(id, website, collectionName + "_" + key));
+        return new RestResp<>(websiteKgService.modify(kgName, id,website));
     }
 
     @ApiOperation("新增网站")
     @POST
     @Path("{key}/add")
     public RestResp<Website> add(@Valid Website website,
+                                 @HeaderParam("kgName") String kgName,
                         @PathParam("key") @DefaultValue("default") String key) {
-        return new RestResp<>(websiteService.add(website, collectionName + "_" + key));
+        return new RestResp<>(websiteKgService.insert(kgName,website));
     }
 
     @ApiOperation("网站词频统计")
@@ -168,19 +179,21 @@ public class WebsiteRestApi {
     @ApiOperation("数据集检测结果统计")
     @POST
     @Path("{key}/check/stat")
+    @Deprecated
     public RestResp<List<Map<String, Object>>> checkStat(@PathParam("key") @DefaultValue("default") String key) {
-        List<Map<String, Object>> statDetailList = websiteService.checkStat(key);
-        return new RestResp<>(statDetailList);
+        return new RestResp<>();
     }
 
     @POST
     @Path("{key}/task/add")
-    @ApiOperation("添加任务")
+    @ApiOperation("添加标错任务")
     public RestResp<Task> taskAdd(
             @PathParam("key") @DefaultValue("default") String key,
-            @Valid TaskAdd taskAdd){
+            @HeaderParam("kgName") String kgName,
+            @Valid TaskAdd taskAdd) {
         taskAdd.setKey(key);
         taskAdd.setTable(collectionName);
+        taskAdd.setKgName(kgName);
         return new RestResp<>(taskService.add(taskAdd));
     }
 

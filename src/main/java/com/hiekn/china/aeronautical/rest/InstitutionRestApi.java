@@ -2,6 +2,7 @@ package com.hiekn.china.aeronautical.rest;
 
 import com.hiekn.boot.autoconfigure.base.model.result.RestData;
 import com.hiekn.boot.autoconfigure.base.model.result.RestResp;
+import com.hiekn.china.aeronautical.knowledge.InstitutionKgService;
 import com.hiekn.china.aeronautical.model.bean.Dataset;
 import com.hiekn.china.aeronautical.model.bean.Institution;
 import com.hiekn.china.aeronautical.model.bean.Task;
@@ -26,6 +27,7 @@ import javax.ws.rs.Consumes;
 import javax.ws.rs.DELETE;
 import javax.ws.rs.DefaultValue;
 import javax.ws.rs.GET;
+import javax.ws.rs.HeaderParam;
 import javax.ws.rs.POST;
 import javax.ws.rs.PUT;
 import javax.ws.rs.Path;
@@ -45,6 +47,10 @@ import java.util.Map;
 @Api("研究机构管理")
 @Produces(MediaType.APPLICATION_JSON)
 public class InstitutionRestApi {
+
+    @Autowired
+    private InstitutionKgService institutionKgService;
+
 
     @Autowired
     private InstitutionService institutionService;
@@ -70,18 +76,20 @@ public class InstitutionRestApi {
     @GET
     @Path("{key}/{id}")
     public RestResp<Institution> findOne(
-            @PathParam("id") String id,
+            @PathParam("id") Long id,
+            @HeaderParam("kgName") String kgName,
             @PathParam("key") @DefaultValue("default") String key) {
-        return new RestResp<>(institutionService.findOne(id, collectionName + "_" + key));
+        return new RestResp<>(institutionKgService.findOne(kgName, id));
     }
 
     @ApiOperation("删除研究机构")
     @DELETE
     @Path("{key}/{id}")
     public RestResp delete(
-            @PathParam("id") String id,
+            @PathParam("id") Long id,
+            @HeaderParam("kgName") String kgName,
             @PathParam("key") @DefaultValue("default") String key) {
-        institutionService.delete(id, collectionName + "_" + key);
+        institutionKgService.delete(kgName, id);
         return new RestResp<>();
     }
 
@@ -90,10 +98,11 @@ public class InstitutionRestApi {
     @Path("{key}/{id}")
     @Consumes(MediaType.APPLICATION_JSON)
     public RestResp<Institution> modify(
-            @PathParam("id") String id,
+            @PathParam("id") Long id,
+            @HeaderParam("kgName") String kgName,
             @Valid Institution institution,
             @PathParam("key") @DefaultValue("default") String key) {
-        return new RestResp<>(institutionService.modify(id, institution, collectionName + "_" + key));
+        return new RestResp<>(institutionKgService.modify(kgName, id, institution));
     }
 
     @ApiOperation("新增研究机构")
@@ -101,17 +110,18 @@ public class InstitutionRestApi {
     @Path("{key}/add")
     public RestResp<Institution> add(
             @Valid Institution institution,
+            @HeaderParam("kgName") String kgName,
             @PathParam("key") @DefaultValue("default") String key) {
-        return new RestResp<>(institutionService.add(institution, collectionName + "_" + key));
+        return new RestResp<>(institutionKgService.insert(kgName, institution));
     }
 
     @ApiOperation("研究机构词频统计")
     @POST
     @Path("{key}/word")
-    public RestResp<RestData<Institution>>  wordStatistics(
+    public RestResp<RestData<Institution>> wordStatistics(
             @Valid WordStatQuery wordStatQuery,
             @PathParam("key") @DefaultValue("default") String key) {
-       return new RestResp<>(institutionService.wordStatistics(wordStatQuery,collectionName + "_" + key));
+        return new RestResp<>(institutionService.wordStatistics(wordStatQuery, collectionName + "_" + key));
     }
 
     @ApiOperation("会议统计标错")
@@ -131,7 +141,7 @@ public class InstitutionRestApi {
     public RestResp<Map<String, Object>> importData(
             @BeanParam FileImport fileImport,
             @PathParam("key") @DefaultValue("default") String key) {
-        Map<String, Object> map = institutionService.importData(fileImport,collectionName + "_" + key);
+        Map<String, Object> map = institutionService.importData(fileImport, collectionName + "_" + key);
         return new RestResp<>(map);
     }
 
@@ -140,7 +150,7 @@ public class InstitutionRestApi {
     @Path("{key}/export")
     @Produces(MediaType.APPLICATION_OCTET_STREAM)
     public Response export(
-            @PathParam("key") @DefaultValue("default") String key){
+            @PathParam("key") @DefaultValue("default") String key) {
         Dataset dataset = datasetService.findFirstByTypeKey(collectionName + "_" + key);
         StreamingOutput fileStream = new StreamingOutput() {
             @Override
@@ -157,27 +167,29 @@ public class InstitutionRestApi {
     @ApiOperation("数据集检测结果统计")
     @POST
     @Path("{key}/check/stat")
+    @Deprecated
     public RestResp<List<Map<String, Object>>> checkStat(
-            @PathParam("key") @DefaultValue("default") String key){
-        List<Map<String, Object>> statDetailList= institutionService.checkStat(key);
-        return new RestResp<>(statDetailList);
+            @PathParam("key") @DefaultValue("default") String key) {
+        return new RestResp<>();
     }
 
     @POST
     @Path("{key}/task/add")
-    @ApiOperation("添加任务")
+    @ApiOperation("添加标错任务")
     public RestResp<Task> taskAdd(
             @PathParam("key") @DefaultValue("default") String key,
-            @Valid TaskAdd taskAdd){
+            @HeaderParam("kgName") String kgName,
+            @Valid TaskAdd taskAdd) {
         taskAdd.setKey(key);
         taskAdd.setTable(collectionName);
+        taskAdd.setKgName(kgName);
         return new RestResp<>(taskService.add(taskAdd));
     }
 
     @GET
     @ApiOperation("研究机构字段")
     @Path("column")
-    public RestResp getColumn(){
+    public RestResp getColumn() {
         return new RestResp<>(DataBeanUtils.getClassProperty(Institution.class));
     }
 

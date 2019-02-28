@@ -17,6 +17,8 @@ public class TaskAdd {
     @ApiModelProperty("任务名称")
     private String name;
 
+    private String kgName;
+
     @ApiModelProperty("规则")
     private List<TaskRule> rules;
 }

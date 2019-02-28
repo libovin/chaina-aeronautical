@@ -41,11 +41,11 @@ public class Task extends Base {
      * 检测数
      */
     @ApiModelProperty(hidden = true)
-    private Integer promote;
+    private Long promote;
 
     /**
      * 纠错量
      */
     @ApiModelProperty(hidden = true)
-    private Integer errorCount;
+    private Long errorCount;
 }

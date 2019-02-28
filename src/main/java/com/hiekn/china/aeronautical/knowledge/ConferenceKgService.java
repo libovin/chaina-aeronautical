@@ -10,10 +10,10 @@ import java.util.List;
 @Service
 public class ConferenceKgService {
 
+    private final static String schema = "conference";
+
     @Autowired
     private KgBaseService kgBaseService;
-
-    private final static String schema = "conference";
 
     public Conference findOne(String kgName, Long id) {
         return kgBaseService.findOne(kgName, schema, id, Conference.class);
@@ -27,17 +27,21 @@ public class ConferenceKgService {
         return kgBaseService.count(kgName, schema);
     }
 
-
     public void delete(String kgName, Long id) {
         kgBaseService.delete(kgName, schema, id);
     }
 
-    public void insert(String kgName, Conference conference) {
-        kgBaseService.insert(kgName, schema, conference);
+    public Conference insert(String kgName, Conference conference) {
+        return kgBaseService.insert(kgName, schema, conference);
     }
 
-    public void modify(String kgName, Long id, Conference conference) {
-        kgBaseService.modify(kgName, schema, id, conference);
+    public Conference modify(String kgName, Long id, Conference conference) {
+        return kgBaseService.modify(kgName, schema, id, conference);
     }
+
+
+//    public CloseableIterator<Conference> findAllByStream(String kgName) {
+//        return kgBaseService.stream(kgName,schema);
+//    }
 
 }

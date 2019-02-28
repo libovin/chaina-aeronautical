@@ -54,7 +54,7 @@ public class BaseRepositoryCustomImpl<T> implements BaseRepositoryCustom<T> {
     }
 
 
-    public List<Result> getAggResult (WordStatQuery wq, String collectionName){
+    public List<Result> getAggResult(WordStatQuery wq, String collectionName) {
         AggregationResults<Result> agg = mongoTemplate.aggregate(
                 newAggregation(
                         group(wq.getColumn())
@@ -66,7 +66,7 @@ public class BaseRepositoryCustomImpl<T> implements BaseRepositoryCustom<T> {
         return agg.getMappedResults();
     }
 
-    public WriteResult updateMulti (Query query, Update update, String collectionName) {
-        return mongoTemplate.updateMulti(query,update,collectionName);
+    public WriteResult updateMulti(Query query, Update update, String collectionName) {
+        return mongoTemplate.updateMulti(query, update, collectionName);
     }
 }

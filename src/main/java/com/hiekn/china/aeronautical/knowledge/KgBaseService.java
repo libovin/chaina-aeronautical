@@ -18,8 +18,11 @@ import org.springframework.cglib.beans.BeanMap;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
 import org.springframework.data.mongodb.core.MongoTemplate;
+import org.springframework.data.mongodb.core.aggregation.Aggregation;
+import org.springframework.data.mongodb.core.aggregation.AggregationResults;
 import org.springframework.data.mongodb.core.query.Query;
 import org.springframework.data.mongodb.core.query.Update;
+import org.springframework.data.util.CloseableIterator;
 import org.springframework.stereotype.Service;
 
 import javax.annotation.PostConstruct;
@@ -30,6 +33,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 
+import static org.springframework.data.mongodb.core.aggregation.Aggregation.lookup;
 import static org.springframework.data.mongodb.core.query.Criteria.where;
 import static org.springframework.data.mongodb.core.query.Query.query;
 
@@ -193,11 +197,15 @@ public class KgBaseService {
 
     public <T extends MarkError> T findOne(String kgName, String schema, Long id, Class<T> clz) {
         Map<Long, Map<String, Object>> entityIdMap = getEntityMapById(kgName, schema, id);
-        T entity = mapToEntity(entityIdMap.get(id), clz);
-        if (entity != null) {
-            entity.setId(id.toString());
+        Map<String, Object> entityMap = entityIdMap.get(id);
+        if(entityMap!=null) {
+            T entity = mapToEntity(entityMap, clz);
+            if (entity != null) {
+                entity.setId(id.toString());
+            }
+            return entity;
         }
-        return entity;
+        return null;
     }
 
     public <T extends MarkError> List<T> find(String kgName, String schema, Pageable pageable, Class<T> clz) {
@@ -225,9 +233,10 @@ public class KgBaseService {
         return basicInfo.getId();
     }
 
-    public <T extends MarkError> void insert(String kgName, String schema, T entity) {
+    public <T extends MarkError> T insert(String kgName, String schema, T entity) {
         MongoTemplate mongoTemplate = template(kgName);
         Long entityId = maxId(kgName) + 1;
+        entity.setId(entityId.toString());
         Long conceptId = schemaId(kgName, schema);
         BeanMap beanMap = BeanMap.create(entity);
         String name = null;
@@ -252,9 +261,10 @@ public class KgBaseService {
         mongoTemplate.save(new BasicInfo(entityId, name, metaData));
         mongoTemplate.save(new EntityId(entityId, name, conceptId, metaData));
         mongoTemplate.save(new ConceptInstance(conceptId, entityId, metaData));
+        return entity;
     }
 
-    public <T extends MarkError> void modify(String kgName, String schema, Long entityId, T entity) {
+    public <T extends MarkError> T modify(String kgName, String schema, Long entityId, T entity) {
         MongoTemplate mongoTemplate = template(kgName);
         Long conceptId = schemaId(kgName, schema);
         BeanMap beanMap = BeanMap.create(entity);
@@ -270,6 +280,7 @@ public class KgBaseService {
                 mongoTemplate.updateFirst(query, update, AttributeString.class);
             }
         }
+        return entity;
     }
 
     public void delete(String kgName, String schema, Long id) {
@@ -282,20 +293,13 @@ public class KgBaseService {
         mongoTemplate.remove(Query.query(where(OBJ_ID).is(id)), BasicInfo.class);
     }
 
-
-    public List<AttributeObject> getAttributeObject(String kgName) {
+    public  <T extends MarkError> CloseableIterator<T> stream(String kgName, String schema, Class<T> clz){
         MongoTemplate mongoTemplate = template(kgName);
-        return mongoTemplate.find(new Query(), AttributeObject.class);
-    }
+        Aggregation aggregation = Aggregation.newAggregation();
+        lookup("","","","");
 
-
-    public List<AttributeSummary> attributeSummary(String kgName, Long id) {
-        MongoTemplate mongoTemplate = template(kgName);
-        return mongoTemplate.find(new Query(where(ENTITY_ID).is(id)), AttributeSummary.class);
-    }
-
-    public List<AttributeSummary> attributeSummary(String kgName, List<Long> ids) {
-        MongoTemplate mongoTemplate = template(kgName);
-        return mongoTemplate.find(new Query(where(ENTITY_ID).in(ids)), AttributeSummary.class);
+        AggregationResults<T> aggregate = mongoTemplate.aggregate(aggregation, ConceptInstance.class, clz);
+        aggregate.iterator();
+        return null;
     }
 }

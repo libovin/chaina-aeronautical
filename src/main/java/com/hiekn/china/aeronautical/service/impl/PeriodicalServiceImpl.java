@@ -113,11 +113,6 @@ public class PeriodicalServiceImpl implements PeriodicalService {
         return map;
     }
 
-    public List<Map<String, Object>> checkStat(String key) {
-
-        return null;
-    }
-
     public void exportData(String collectionName, OutputStream output) {
         try {
             Workbook wb = new SXSSFWorkbook(100);

@@ -2,6 +2,7 @@ package com.hiekn.china.aeronautical.rest;
 
 import com.hiekn.boot.autoconfigure.base.model.result.RestData;
 import com.hiekn.boot.autoconfigure.base.model.result.RestResp;
+import com.hiekn.china.aeronautical.knowledge.ConferenceKgService;
 import com.hiekn.china.aeronautical.model.bean.Conference;
 import com.hiekn.china.aeronautical.model.bean.Dataset;
 import com.hiekn.china.aeronautical.model.bean.Task;
@@ -26,6 +27,7 @@ import javax.ws.rs.Consumes;
 import javax.ws.rs.DELETE;
 import javax.ws.rs.DefaultValue;
 import javax.ws.rs.GET;
+import javax.ws.rs.HeaderParam;
 import javax.ws.rs.POST;
 import javax.ws.rs.PUT;
 import javax.ws.rs.Path;
@@ -50,6 +52,9 @@ public class ConferenceRestApi {
     private ConferenceService conferenceService;
 
     @Autowired
+    private ConferenceKgService conferenceKgService;
+
+    @Autowired
     private TaskService taskService;
 
     @Autowired
@@ -62,6 +67,7 @@ public class ConferenceRestApi {
     @Path("{key}/list")
     public RestResp<RestData<Conference>> findAll(
             @PathParam("key") @DefaultValue("default") String key,
+            @HeaderParam("kgName") String kgName,
             @Valid ConferenceQuery conferenceQuery) {
         return new RestResp<>(conferenceService.findAll(conferenceQuery, collectionName + "_" + key));
     }
@@ -70,18 +76,20 @@ public class ConferenceRestApi {
     @GET
     @Path("{key}/{id}")
     public RestResp<Conference> findOne(
-            @PathParam("id") String id,
+            @PathParam("id") Long id,
+            @HeaderParam("kgName") String kgName,
             @PathParam("key") @DefaultValue("default") String key) {
-        return new RestResp<>(conferenceService.findOne(id, collectionName + "_" + key));
+        return new RestResp<>(conferenceKgService.findOne(kgName, id));
     }
 
     @ApiOperation("删除会议")
     @DELETE
     @Path("{key}/{id}")
     public RestResp delete(
-            @PathParam("id") String id,
+            @PathParam("id") Long id,
+            @HeaderParam("kgName") String kgName,
             @PathParam("key") @DefaultValue("default") String key) {
-        conferenceService.delete(id, collectionName + "_" + key);
+        conferenceKgService.delete(kgName, id);
         return new RestResp<>();
     }
 
@@ -91,9 +99,10 @@ public class ConferenceRestApi {
     @Consumes(MediaType.APPLICATION_JSON)
     public RestResp<Conference> modify(
             @PathParam("key") @DefaultValue("default") String key,
-            @PathParam("id") String id,
+            @HeaderParam("kgName") String kgName,
+            @PathParam("id") Long id,
             @Valid Conference conference) {
-        return new RestResp<>(conferenceService.modify(id, conference, collectionName + "_" + key));
+        return new RestResp<>(conferenceKgService.modify(kgName, id, conference));
     }
 
     @ApiOperation("新增会议")
@@ -101,8 +110,9 @@ public class ConferenceRestApi {
     @Path("{key}/add")
     public RestResp<Conference> add(
             @Valid Conference conference,
+            @HeaderParam("kgName") String kgName,
             @PathParam("key") @DefaultValue("default") String key) {
-        return new RestResp<>(conferenceService.add(conference, collectionName + "_" + key));
+        return new RestResp<>(conferenceKgService.insert(kgName, conference));
     }
 
     @ApiOperation("会议词频统计")
@@ -156,21 +166,23 @@ public class ConferenceRestApi {
     @ApiOperation("数据集检测结果统计")
     @POST
     @Path("{key}/check/stat")
+    @Deprecated
     public RestResp<List<Map<String, Object>>> checkStat(
             @PathParam("key") @DefaultValue("default") String key) {
-        List<Map<String, Object>> statDetailList = conferenceService.checkStat(key);
-        return new RestResp<>(statDetailList);
+        return new RestResp<>();
     }
 
 
     @POST
     @Path("{key}/task/add")
-    @ApiOperation("添加任务")
+    @ApiOperation("添加标错任务")
     public RestResp<Task> taskAdd(
             @PathParam("key") @DefaultValue("default") String key,
+            @HeaderParam("kgName") String kgName,
             @Valid TaskAdd taskAdd) {
         taskAdd.setKey(key);
         taskAdd.setTable(collectionName);
+        taskAdd.setKgName(kgName);
         return new RestResp<>(taskService.add(taskAdd));
     }
 

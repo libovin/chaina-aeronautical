@@ -41,15 +41,15 @@ public class ConferenceRepositoryImpl extends BaseRepositoryCustomImpl<Conferenc
     public RestData<Conference> wordStatistics(WordStatQuery wordStatQuery, String collectionName) {
         List<Result> results = getAggResult(wordStatQuery, collectionName);
         Set<String> key = new HashSet<>();
-        BigDecimal a = BigDecimal.ZERO;
+        BigDecimal count = BigDecimal.ZERO;
         for (Result r : results) {
             key.add(r.getName());
-            a = a.add(r.getCount());
+            count = count.add(r.getCount());
         }
         Pageable pageable = new PageRequest(wordStatQuery.getPageNo() - 1, wordStatQuery.getPageSize());
         Query query = Query.query(where(wordStatQuery.getColumn()).in(key)).with(pageable);
         List<Conference> list = mongoTemplate.find(query, Conference.class, collectionName);
-        return new RestData<>(list, a.intValue());
+        return new RestData<>(list, count.intValue());
     }
 
     public CloseableIterator<Conference> findAllByStream(String collectionName) {

@@ -2,6 +2,7 @@ package com.hiekn.china.aeronautical.rest;
 
 import com.hiekn.boot.autoconfigure.base.model.result.RestData;
 import com.hiekn.boot.autoconfigure.base.model.result.RestResp;
+import com.hiekn.china.aeronautical.knowledge.PublisherKgService;
 import com.hiekn.china.aeronautical.model.bean.Dataset;
 import com.hiekn.china.aeronautical.model.bean.Publisher;
 import com.hiekn.china.aeronautical.model.bean.Task;
@@ -26,6 +27,7 @@ import javax.ws.rs.Consumes;
 import javax.ws.rs.DELETE;
 import javax.ws.rs.DefaultValue;
 import javax.ws.rs.GET;
+import javax.ws.rs.HeaderParam;
 import javax.ws.rs.POST;
 import javax.ws.rs.PUT;
 import javax.ws.rs.Path;
@@ -45,6 +47,8 @@ import java.util.Map;
 @Api("出版机构管理")
 @Produces(MediaType.APPLICATION_JSON)
 public class PublisherRestApi {
+    @Autowired
+    private PublisherKgService publisherKgService;
 
     @Autowired
     private PublisherService publisherService;
@@ -61,6 +65,7 @@ public class PublisherRestApi {
     @POST
     @Path("{key}/list")
     public RestResp<RestData<Publisher>> findAll(@Valid PublisherQuery publisherQuery,
+                                                 @HeaderParam("kgName") String kgName,
                                                  @PathParam("key") @DefaultValue("default") String key) {
         return new RestResp<>(publisherService.findAll(publisherQuery, collectionName + "_" + key));
     }
@@ -68,16 +73,19 @@ public class PublisherRestApi {
     @ApiOperation("出版机构详情")
     @GET
     @Path("{key}/{id}")
-    public RestResp<Publisher> findOne(@PathParam("id") String id,
+    public RestResp<Publisher> findOne(@PathParam("id") Long id,
+                                       @HeaderParam("kgName") String kgName,
                             @PathParam("key") @DefaultValue("default") String key) {
-        return new RestResp<>(publisherService.findOne(id, collectionName + "_" + key));
+        return new RestResp<>(publisherKgService.findOne(kgName, id));
     }
 
     @ApiOperation("删除出版机构")
     @DELETE
     @Path("{key}/{id}")
-    public RestResp delete(@PathParam("id") String id, @PathParam("key") @DefaultValue("default") String key) {
-        publisherService.delete(id, collectionName + "_" + key);
+    public RestResp delete(@PathParam("id") Long id,
+                           @HeaderParam("kgName") String kgName,
+                           @PathParam("key") @DefaultValue("default") String key) {
+        publisherKgService.delete(kgName, id);
         return new RestResp<>();
     }
 
@@ -85,18 +93,20 @@ public class PublisherRestApi {
     @PUT
     @Path("{key}/{id}")
     @Consumes(MediaType.APPLICATION_JSON)
-    public RestResp<Publisher> modify(@PathParam("id") String id,
+    public RestResp<Publisher> modify(@PathParam("id") Long id,
+                                      @HeaderParam("kgName") String kgName,
                                       @PathParam("key") @DefaultValue("default") String key,
                                       @Valid Publisher publisher) {
-        return new RestResp<>(publisherService.modify(id, publisher, collectionName + "_" + key));
+        return new RestResp<>(publisherKgService.modify(kgName, id, publisher));
     }
 
     @ApiOperation("新增出版机构")
     @POST
     @Path("{key}/add")
     public RestResp<Publisher> add(@Valid Publisher publisher,
+                                   @HeaderParam("kgName") String kgName,
                         @PathParam("key") @DefaultValue("default") String key) {
-        return new RestResp<>(publisherService.add(publisher, collectionName + "_" + key));
+        return new RestResp<>(publisherKgService.insert(kgName, publisher));
     }
 
     @ApiOperation("出版机构词频统计")
@@ -149,19 +159,21 @@ public class PublisherRestApi {
     @ApiOperation("数据集检测结果统计")
     @POST
     @Path("{key}/check/stat")
+    @Deprecated
     public RestResp<List<Map<String, Object>>> checkStat(@PathParam("key") @DefaultValue("default") String key) {
-        List<Map<String, Object>> statDetailList = publisherService.checkStat(key);
-        return new RestResp<>(statDetailList);
+        return new RestResp<>();
     }
 
     @POST
     @Path("{key}/task/add")
-    @ApiOperation("添加任务")
+    @ApiOperation("添加标错任务")
     public RestResp<Task> taskAdd(
             @PathParam("key") @DefaultValue("default") String key,
-            @Valid TaskAdd taskAdd){
+            @HeaderParam("kgName") String kgName,
+            @Valid TaskAdd taskAdd) {
         taskAdd.setKey(key);
         taskAdd.setTable(collectionName);
+        taskAdd.setKgName(kgName);
         return new RestResp<>(taskService.add(taskAdd));
     }
 

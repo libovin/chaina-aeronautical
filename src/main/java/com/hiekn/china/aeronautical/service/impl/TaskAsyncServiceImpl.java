@@ -55,10 +55,11 @@ public class TaskAsyncServiceImpl implements TaskAsyncService {
         String table = task.getTable();
         String key = task.getKey();
         String collectionName = table + "_" + key;
+
         CloseableIterator<T> closeableIterator = mongoTemplate.stream(new Query(), getTableClass(table), collectionName);
 
-        int promote = 0;
-        int errorCount = 0;
+        long promote = 0;
+        long errorCount = 0;
         while (closeableIterator.hasNext()) {
             T obj = closeableIterator.next();
             if (checkSingle(obj, task.getTaskRule(), collectionName)) {
@@ -91,12 +92,6 @@ public class TaskAsyncServiceImpl implements TaskAsyncService {
             Pattern pattern = RuleUtils.instance.getRulePattern(rule.getId());
             Matcher matcher = pattern.matcher(columnValue);
             Boolean flag = matcher.matches();
-//            List msgList = (List) errorMessage.computeIfAbsent(column, key -> new ArrayList<>());
-//            c.put("column", column);
-//            c.put("value", columnValue);
-//            c.put("pattern", pattern.pattern());
-//            c.put("result", flag);
-//            msgList.add(c);
             errorMap.merge(column, flag, (a, b) -> a | b);
         }
         for (Map.Entry<String, Boolean> x : errorMap.entrySet()) {
