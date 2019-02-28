@@ -68,8 +68,9 @@ public class InstitutionRestApi {
     @Path("{key}/list")
     public RestResp<RestData<Institution>> findAll(
             @Valid InstitutionQuery institutionQuery,
+            @HeaderParam("kgName") String kgName,
             @PathParam("key") @DefaultValue("default") String key) {
-        return new RestResp<>(institutionService.findAll(institutionQuery, collectionName + "_" + key));
+        return new RestResp<>(institutionKgService.page(kgName, institutionQuery));
     }
 
     @ApiOperation("研究机构详情")

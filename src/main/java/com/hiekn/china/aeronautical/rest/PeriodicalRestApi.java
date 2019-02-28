@@ -68,7 +68,7 @@ public class PeriodicalRestApi {
     public RestResp<RestData<Periodical>> findAll(@Valid PeriodicalQuery periodicalQuery,
                                                   @HeaderParam("kgName") String kgName,
                                                   @PathParam("key") @DefaultValue("default") String key) {
-        return new RestResp<>(periodicalService.findAll(periodicalQuery, collectionName + "_" + key));
+        return new RestResp<>(periodicalKgService.page(kgName,periodicalQuery));
     }
 
     @ApiOperation("期刊详情")

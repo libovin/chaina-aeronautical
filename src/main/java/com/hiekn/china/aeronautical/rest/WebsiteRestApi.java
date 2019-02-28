@@ -67,8 +67,8 @@ public class WebsiteRestApi {
     @Path("{key}/list")
     public RestResp<RestData<Website>> findAll(@Valid WebsiteQuery websiteQuery,
                                                @HeaderParam("kgName") String kgName,
-                                                  @PathParam("key") @DefaultValue("default") String key) {
-        return new RestResp<>(websiteService.findAll(websiteQuery, collectionName + "_" + key));
+                                               @PathParam("key") @DefaultValue("default") String key) {
+        return new RestResp<>(websiteKgService.page(kgName, websiteQuery));
     }
 
     @ApiOperation("网站详情")
@@ -76,7 +76,7 @@ public class WebsiteRestApi {
     @Path("{key}/{id}")
     public RestResp<Website> findOne(@PathParam("id") Long id,
                                      @HeaderParam("kgName") String kgName,
-                            @PathParam("key") @DefaultValue("default") String key) {
+                                     @PathParam("key") @DefaultValue("default") String key) {
         return new RestResp<>(websiteKgService.findOne(kgName, id));
     }
 
@@ -96,9 +96,9 @@ public class WebsiteRestApi {
     @Consumes(MediaType.APPLICATION_JSON)
     public RestResp<Website> modify(@PathParam("id") Long id,
                                     @HeaderParam("kgName") String kgName,
-                                       @PathParam("key") @DefaultValue("default") String key,
-                                       @Valid Website website) {
-        return new RestResp<>(websiteKgService.modify(kgName, id,website));
+                                    @PathParam("key") @DefaultValue("default") String key,
+                                    @Valid Website website) {
+        return new RestResp<>(websiteKgService.modify(kgName, id, website));
     }
 
     @ApiOperation("新增网站")
@@ -106,16 +106,16 @@ public class WebsiteRestApi {
     @Path("{key}/add")
     public RestResp<Website> add(@Valid Website website,
                                  @HeaderParam("kgName") String kgName,
-                        @PathParam("key") @DefaultValue("default") String key) {
-        return new RestResp<>(websiteKgService.insert(kgName,website));
+                                 @PathParam("key") @DefaultValue("default") String key) {
+        return new RestResp<>(websiteKgService.insert(kgName, website));
     }
 
     @ApiOperation("网站词频统计")
     @POST
     @Path("{key}/word")
     public RestResp<RestData<Website>> wordStatistics(@Valid WordStatQuery wordStatQuery,
-                               @PathParam("key") @DefaultValue("default") String key) {
-        return new RestResp<>(websiteService.wordStatistics(wordStatQuery,collectionName + "_" + key));
+                                                      @PathParam("key") @DefaultValue("default") String key) {
+        return new RestResp<>(websiteService.wordStatistics(wordStatQuery, collectionName + "_" + key));
     }
 
     @ApiOperation("会议统计标错")
@@ -135,7 +135,7 @@ public class WebsiteRestApi {
     public RestResp<Map<String, Object>> importData(
             @BeanParam FileImport fileImport,
             @PathParam("key") @DefaultValue("default") String key) {
-        Map<String, Object> map = websiteService.importData(fileImport,collectionName + "_" + key);
+        Map<String, Object> map = websiteService.importData(fileImport, collectionName + "_" + key);
         return new RestResp<>(map);
     }
 
@@ -200,7 +200,7 @@ public class WebsiteRestApi {
     @GET
     @ApiOperation("网站字段")
     @Path("column")
-    public RestResp getColumn(){
+    public RestResp getColumn() {
         return new RestResp<>(DataBeanUtils.getClassProperty(Website.class));
     }
 }

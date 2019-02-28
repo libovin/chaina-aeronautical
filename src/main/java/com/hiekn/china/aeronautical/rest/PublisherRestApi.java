@@ -67,7 +67,7 @@ public class PublisherRestApi {
     public RestResp<RestData<Publisher>> findAll(@Valid PublisherQuery publisherQuery,
                                                  @HeaderParam("kgName") String kgName,
                                                  @PathParam("key") @DefaultValue("default") String key) {
-        return new RestResp<>(publisherService.findAll(publisherQuery, collectionName + "_" + key));
+        return new RestResp<>(publisherKgService.page(kgName,publisherQuery));
     }
 
     @ApiOperation("出版机构详情")

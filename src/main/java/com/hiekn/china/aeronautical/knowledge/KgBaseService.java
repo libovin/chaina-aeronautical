@@ -19,10 +19,10 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
 import org.springframework.data.mongodb.core.MongoTemplate;
 import org.springframework.data.mongodb.core.aggregation.Aggregation;
+import org.springframework.data.mongodb.core.aggregation.AggregationOperation;
 import org.springframework.data.mongodb.core.aggregation.AggregationResults;
 import org.springframework.data.mongodb.core.query.Query;
 import org.springframework.data.mongodb.core.query.Update;
-import org.springframework.data.util.CloseableIterator;
 import org.springframework.stereotype.Service;
 
 import javax.annotation.PostConstruct;
@@ -33,7 +33,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 
-import static org.springframework.data.mongodb.core.aggregation.Aggregation.lookup;
+import static org.springframework.data.mongodb.core.aggregation.Aggregation.*;
 import static org.springframework.data.mongodb.core.query.Criteria.where;
 import static org.springframework.data.mongodb.core.query.Query.query;
 
@@ -136,26 +136,31 @@ public class KgBaseService {
         return mongoTemplate.findOne(query, BasicInfo.class);
     }
 
-
-    private List<Long> entityIds(String kgName, String schema, Pageable pageable) {
-        MongoTemplate mongoTemplate = template(kgName);
-        Query query = Query.query(where(CONCEPT_ID).is(schemaId(kgName, schema))).with(pageable);
-        List<ConceptInstance> list = mongoTemplate.find(query, ConceptInstance.class);
-        List<Long> entityIds = new ArrayList<>();
-        for (ConceptInstance instance : list) {
-            entityIds.add(instance.getInsId());
-        }
-        return entityIds;
-    }
-
     private List<AttributeString> attrString(String kgName, Long id) {
         MongoTemplate mongoTemplate = template(kgName);
         return mongoTemplate.find(Query.query(where(ENTITY_ID).is(id)), AttributeString.class);
     }
-
-    private List<AttributeString> attrString(String kgName, List<Long> ids) {
+   
+    private List<AttributeString> attrString(String kgName, String schema, Pageable pageable) {
         MongoTemplate mongoTemplate = template(kgName);
-        return mongoTemplate.find(Query.query(where(ENTITY_ID).in(ids)), AttributeString.class);
+        List<AggregationOperation> operationList = new ArrayList<>();
+        operationList.add(match(where(CONCEPT_ID).is(schemaId(kgName, schema))));
+        if (pageable != null) {
+            operationList.add(skip((long) (pageable.getPageSize() * (pageable.getPageNumber() - 1))));
+            operationList.add(limit(pageable.getPageSize()));
+        }
+        operationList.add(lookup("attribute_string", "ins_id", "entity_id", "attribute_string"));
+        operationList.add(unwind("attribute_string"));
+        operationList.add(project()
+                .and("attribute_string.entity_id").as("entity_id")
+                .and("attribute_string.entity_type").as("entity_type")
+                .and("attribute_string.attr_id").as("attr_id")
+                .and("attribute_string.attr_value").as("attr_value")
+                .andExclude("_id")
+        );
+        Aggregation aggregation = newAggregation(operationList);
+        AggregationResults<AttributeString> aggregate = mongoTemplate.aggregate(aggregation, ConceptInstance.class, AttributeString.class);
+        return aggregate.getMappedResults();
     }
 
     private <T extends MarkError> T mapToEntity(Map<String, Object> map, Class<T> clz) {
@@ -185,8 +190,7 @@ public class KgBaseService {
     private Map<Long, Map<String, Object>> getEntityMaps(String kgName, String schema, Pageable pageable) {
         Map<Long, Map<String, Object>> entityIdMap = new LinkedHashMap<>();
         Map<Integer, AttrDefine> attributeMap = attrDefineIdMap(kgName, schema);
-        List<Long> ids = entityIds(kgName, schema, pageable);
-        List<AttributeString> attributeString = attrString(kgName, ids);
+        List<AttributeString> attributeString = attrString(kgName, schema, pageable);
         for (AttributeString attribute : attributeString) {
             Map<String, Object> map = entityIdMap.computeIfAbsent(attribute.getEntityId(), (k) -> new HashMap<>());
             AttrDefine ad = attributeMap.get(attribute.getAttrId());
@@ -194,11 +198,15 @@ public class KgBaseService {
         }
         return entityIdMap;
     }
-
+    
+    public <T extends MarkError> List<T> findAll(String kgName, String schema, Class<T> clz) {
+        return find(kgName, schema, null, clz);
+    }
+    
     public <T extends MarkError> T findOne(String kgName, String schema, Long id, Class<T> clz) {
         Map<Long, Map<String, Object>> entityIdMap = getEntityMapById(kgName, schema, id);
         Map<String, Object> entityMap = entityIdMap.get(id);
-        if(entityMap!=null) {
+        if (entityMap != null) {
             T entity = mapToEntity(entityMap, clz);
             if (entity != null) {
                 entity.setId(id.toString());
@@ -216,6 +224,7 @@ public class KgBaseService {
             if (entity != null) {
                 entity.setId(entry.getKey().toString());
             }
+            list.add(entity);
         }
         return list;
     }
@@ -293,13 +302,4 @@ public class KgBaseService {
         mongoTemplate.remove(Query.query(where(OBJ_ID).is(id)), BasicInfo.class);
     }
 
-    public  <T extends MarkError> CloseableIterator<T> stream(String kgName, String schema, Class<T> clz){
-        MongoTemplate mongoTemplate = template(kgName);
-        Aggregation aggregation = Aggregation.newAggregation();
-        lookup("","","","");
-
-        AggregationResults<T> aggregate = mongoTemplate.aggregate(aggregation, ConceptInstance.class, clz);
-        aggregate.iterator();
-        return null;
-    }
 }

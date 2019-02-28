@@ -1,7 +1,10 @@
 package com.hiekn.china.aeronautical.knowledge;
 
+import com.hiekn.boot.autoconfigure.base.model.result.RestData;
 import com.hiekn.china.aeronautical.model.bean.Conference;
+import com.hiekn.china.aeronautical.model.vo.ConferenceQuery;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 
@@ -15,12 +18,23 @@ public class ConferenceKgService {
     @Autowired
     private KgBaseService kgBaseService;
 
+    public RestData<Conference> page(String kgName, ConferenceQuery conferenceQuery){
+        return new RestData<>(find(kgName,conferenceQuery),kgBaseService.count(kgName,schema));
+    }
+
     public Conference findOne(String kgName, Long id) {
         return kgBaseService.findOne(kgName, schema, id, Conference.class);
     }
 
-    public List<Conference> find(String kgName, Pageable pageable) {
+    public List<Conference> find(String kgName, ConferenceQuery conferenceQuery) {
+        int page = conferenceQuery.getPageNo();
+        int size = conferenceQuery.getPageSize();
+        Pageable pageable = new PageRequest(page, size);
         return kgBaseService.find(kgName, schema, pageable, Conference.class);
+    }
+
+    public List<Conference> findAll(String kgName) {
+        return kgBaseService.findAll(kgName, schema, Conference.class);
     }
 
     public Long count(String kgName) {
@@ -38,10 +52,5 @@ public class ConferenceKgService {
     public Conference modify(String kgName, Long id, Conference conference) {
         return kgBaseService.modify(kgName, schema, id, conference);
     }
-
-
-//    public CloseableIterator<Conference> findAllByStream(String kgName) {
-//        return kgBaseService.stream(kgName,schema);
-//    }
 
 }

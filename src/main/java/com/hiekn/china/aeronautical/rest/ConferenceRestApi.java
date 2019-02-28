@@ -69,7 +69,7 @@ public class ConferenceRestApi {
             @PathParam("key") @DefaultValue("default") String key,
             @HeaderParam("kgName") String kgName,
             @Valid ConferenceQuery conferenceQuery) {
-        return new RestResp<>(conferenceService.findAll(conferenceQuery, collectionName + "_" + key));
+        return new RestResp<>(conferenceKgService.page(kgName,conferenceQuery));
     }
 
     @ApiOperation("会议详情")

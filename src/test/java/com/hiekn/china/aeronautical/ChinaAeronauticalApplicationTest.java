@@ -1,6 +1,7 @@
 package com.hiekn.china.aeronautical;
 
 import com.hiekn.china.aeronautical.knowledge.ConferenceKgService;
+import com.hiekn.china.aeronautical.knowledge.KgBaseService;
 import com.hiekn.china.aeronautical.model.bean.Conference;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -14,6 +15,9 @@ public class ChinaAeronauticalApplicationTest {
 
     @Autowired
     private ConferenceKgService conferenceKgService;
+
+    @Autowired
+    private KgBaseService kgBaseService;
 
     private static String KG_DB_NAME = "abcd_1234_7349l1owxwqjqw3a";
 
@@ -54,5 +58,10 @@ public class ChinaAeronauticalApplicationTest {
         conference.setVenue("Venue");
         conference.setSpecialClassified("SpecialClassified");
         conferenceKgService.modify(KG_DB_NAME, 15l, conference);
+    }
+
+    @Test
+    public void s() {
+
     }
 }
