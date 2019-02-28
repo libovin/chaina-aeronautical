@@ -48,9 +48,7 @@ public class KgBaseService {
     private MongoTemplateUtils mongoTemplateUtils;
 
     private Map<String, String> kgNameMap = new ConcurrentHashMap<>();
-
     private Map<String, Map<String, Long>> kgSchemaIdMap = new ConcurrentHashMap<>();
-
     private Map<String, Map<String, Map<Integer, AttrDefine>>> kgSchemaAttrId = new ConcurrentHashMap<>();
     private Map<String, Map<String, Map<String, AttrDefine>>> kgSchemaAttrName = new ConcurrentHashMap<>();
     /**
@@ -71,11 +69,15 @@ public class KgBaseService {
     public static final String ATTR_ID = "attr_id";
 
     @PostConstruct
-    void init() {
+    private void init() {
         List<KgDbName> list = kgAttrDefineMongoTemplate.find(new Query(), KgDbName.class);
         for (KgDbName kgDbName : list) {
             this.kgNameMap.put(kgDbName.getKgName(), kgDbName.getDbName());
         }
+    }
+
+    public Map<String, String> getKgNameMap() {
+        return this.kgNameMap;
     }
 
     private List<AttrDefine> attrDefineList(String kgName, String schema) {
@@ -140,7 +142,7 @@ public class KgBaseService {
         MongoTemplate mongoTemplate = template(kgName);
         return mongoTemplate.find(Query.query(where(ENTITY_ID).is(id)), AttributeString.class);
     }
-   
+
     private List<AttributeString> attrString(String kgName, String schema, Pageable pageable) {
         MongoTemplate mongoTemplate = template(kgName);
         List<AggregationOperation> operationList = new ArrayList<>();
@@ -198,18 +200,18 @@ public class KgBaseService {
         }
         return entityIdMap;
     }
-    
+
     public <T extends MarkError> List<T> findAll(String kgName, String schema, Class<T> clz) {
         return find(kgName, schema, null, clz);
     }
-    
+
     public <T extends MarkError> T findOne(String kgName, String schema, Long id, Class<T> clz) {
         Map<Long, Map<String, Object>> entityIdMap = getEntityMapById(kgName, schema, id);
         Map<String, Object> entityMap = entityIdMap.get(id);
         if (entityMap != null) {
             T entity = mapToEntity(entityMap, clz);
             if (entity != null) {
-                entity.setId(id.toString());
+                entity.setId(id);
             }
             return entity;
         }
@@ -222,7 +224,7 @@ public class KgBaseService {
         for (Map.Entry<Long, Map<String, Object>> entry : entityIdMap.entrySet()) {
             T entity = mapToEntity(entry.getValue(), clz);
             if (entity != null) {
-                entity.setId(entry.getKey().toString());
+                entity.setId(entry.getKey());
             }
             list.add(entity);
         }
@@ -245,7 +247,7 @@ public class KgBaseService {
     public <T extends MarkError> T insert(String kgName, String schema, T entity) {
         MongoTemplate mongoTemplate = template(kgName);
         Long entityId = maxId(kgName) + 1;
-        entity.setId(entityId.toString());
+        entity.setId(entityId);
         Long conceptId = schemaId(kgName, schema);
         BeanMap beanMap = BeanMap.create(entity);
         String name = null;

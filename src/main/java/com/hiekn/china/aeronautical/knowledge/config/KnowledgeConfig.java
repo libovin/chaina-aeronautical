@@ -41,7 +41,7 @@ public class KnowledgeConfig {
     }
 
     @Primary
-    @Bean
+    @Bean(name = "mongoTemplate")
     public MongoTemplate mongoTemplate(MongoDbFactory mongoDbFactory, MappingMongoConverter mappingMongoConverter) {
         return new MongoTemplate(mongoDbFactory, mappingMongoConverter);
     }

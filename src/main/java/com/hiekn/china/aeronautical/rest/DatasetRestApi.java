@@ -37,6 +37,7 @@ public class DatasetRestApi {
     @ApiOperation("数据集列表")
     @POST
     @Path("list")
+    @Deprecated
     public RestResp<RestData<Dataset>> findAll(@Valid DatasetQuery datasetQuery) {
         return new RestResp<>(datasetService.findAll(datasetQuery));
     }
@@ -44,6 +45,7 @@ public class DatasetRestApi {
     @ApiOperation("数据集详情")
     @GET
     @Path("{id}")
+    @Deprecated
     public RestResp<Dataset> findOne(@PathParam("id") String id) {
         return new RestResp<>(datasetService.findOne(id));
     }
@@ -51,6 +53,7 @@ public class DatasetRestApi {
     @ApiOperation("删除数据集")
     @DELETE
     @Path("{id}")
+    @Deprecated
     public RestResp delete(@PathParam("id") String id) {
         datasetService.delete(id);
         return new RestResp<>();
@@ -60,6 +63,7 @@ public class DatasetRestApi {
     @PUT
     @Path("{id}")
     @Consumes(MediaType.APPLICATION_JSON)
+    @Deprecated
     public RestResp<Dataset> modify(@PathParam("id") String id, @Valid Dataset dataset) {
         return new RestResp<>(datasetService.modify(id, dataset));
     }
@@ -68,6 +72,7 @@ public class DatasetRestApi {
     @POST
     @Path("add")
     @Consumes(MediaType.MULTIPART_FORM_DATA)
+    @Deprecated
     public RestResp<Dataset> add(@Valid @BeanParam DatasetFile datesetFile) throws Exception {
         return new RestResp<>(datasetService.add(datesetFile));
     }

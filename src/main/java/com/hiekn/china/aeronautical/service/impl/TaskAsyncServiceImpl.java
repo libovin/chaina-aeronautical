@@ -12,6 +12,7 @@ import com.hiekn.china.aeronautical.model.bean.Website;
 import com.hiekn.china.aeronautical.repository.TaskRepository;
 import com.hiekn.china.aeronautical.service.TaskAsyncService;
 import com.hiekn.china.aeronautical.util.RuleUtils;
+import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.mongodb.core.MongoTemplate;
 import org.springframework.scheduling.annotation.Async;
@@ -59,10 +60,11 @@ public class TaskAsyncServiceImpl implements TaskAsyncService {
         String kgName = task.getKgName();
         Class<T> tClass = getTableClass(table);
         List<T> all = kgBaseService.findAll(kgName, table, tClass);
+        String dbName = kgBaseService.getKgNameMap().get(kgName);
         long promote = 0;
         long errorCount = 0;
         for (T obj : all) {
-            if (checkSingle(obj, task.getTaskRule(), kgName)) {
+            if (checkSingle(obj, task.getTaskRule(), dbName)) {
                 errorCount++;
             }
             promote++;
@@ -75,7 +77,7 @@ public class TaskAsyncServiceImpl implements TaskAsyncService {
     private <T extends MarkError> boolean checkSingle(T obj, List<Rule> rules, String collectionName) {
         Map<String, Boolean> errorMap = new HashMap<>();
         Map<String, Boolean> hasErrorMap = new HashMap<>();
-//        Map errorMessage = new HashMap<>();
+        // Map errorMessage = new HashMap<>();
         boolean hasError = false;
         for (Rule rule : rules) {
             Map c = new HashMap();
@@ -99,8 +101,10 @@ public class TaskAsyncServiceImpl implements TaskAsyncService {
         }
         obj.setHasError(hasError);
         obj.setHasErrorTag(hasErrorMap);
+        MarkError error = new MarkError();
+        BeanUtils.copyProperties(obj, error);
         // obj.setMarkErrorResult(errorMessage);
-        mongoTemplate.save((MarkError) obj, collectionName);
+        mongoTemplate.save(error, collectionName);
         return hasError;
     }
 
