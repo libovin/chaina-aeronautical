@@ -1,6 +1,7 @@
 package com.hiekn.china.aeronautical.service.impl;
 
 import com.hiekn.boot.autoconfigure.base.model.result.RestData;
+import com.hiekn.china.aeronautical.knowledge.WebsiteKgService;
 import com.hiekn.china.aeronautical.model.bean.Website;
 import com.hiekn.china.aeronautical.model.vo.FileImport;
 import com.hiekn.china.aeronautical.model.vo.WebsiteQuery;
@@ -27,7 +28,6 @@ import org.springframework.data.domain.Sort;
 import org.springframework.data.mongodb.core.query.Criteria;
 import org.springframework.data.mongodb.core.query.Query;
 import org.springframework.data.mongodb.core.query.Update;
-import org.springframework.data.util.CloseableIterator;
 import org.springframework.stereotype.Service;
 
 import java.io.File;
@@ -40,6 +40,9 @@ import java.util.Map;
 
 @Service("websiteService")
 public class WebsiteServiceImpl implements WebsiteService {
+
+    @Autowired
+    private WebsiteKgService websiteKgService;
 
     @Autowired
     private WebsiteRepository websiteRepository;
@@ -87,8 +90,8 @@ public class WebsiteServiceImpl implements WebsiteService {
 
     public Integer wordMarkError(WordMarkError wordMarkError, String collectionName) {
         Query query = Query.query(Criteria.where("_id").in(Arrays.asList(wordMarkError.getIds().split(","))));
-        Update update =Update.update("hasError",true).set("hasErrorTag."+wordMarkError.getColumn(), true);
-        WriteResult writeResult = websiteRepository.updateMulti(query,update,collectionName);
+        Update update = Update.update("hasError", true).set("hasErrorTag." + wordMarkError.getColumn(), true);
+        WriteResult writeResult = websiteRepository.updateMulti(query, update, collectionName);
         return writeResult.getN();
     }
 
@@ -113,20 +116,18 @@ public class WebsiteServiceImpl implements WebsiteService {
     }
 
 
-    public void exportData(String collectionName, OutputStream output) {
+    public void exportData(String kgName, OutputStream output) {
         try {
             Workbook wb = new SXSSFWorkbook(100);
-            CloseableIterator<Website> c = websiteRepository.findAllByStream(collectionName);
+            List<Website> c = websiteKgService.findAll(kgName);
             int index = 1;
             Sheet sheet = wb.createSheet();
             ExportUtils.addOneRow(sheet.createRow(0), DataBeanUtils.getFieldList(Website.class));
-            while (c.hasNext()) {
-                Website item = c.next();
-                ExportUtils.addOneRow(sheet.createRow(index), DataBeanUtils.getFieldValueList(item));
+            for (Website website : c) {
+                ExportUtils.addOneRow(sheet.createRow(index), DataBeanUtils.getFieldValueList(website));
                 index++;
             }
             wb.write(output);
-            c.close();
             output.close();
             wb.close();
         } catch (Exception e) {

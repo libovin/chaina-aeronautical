@@ -1,6 +1,7 @@
 package com.hiekn.china.aeronautical.service.impl;
 
 import com.hiekn.boot.autoconfigure.base.model.result.RestData;
+import com.hiekn.china.aeronautical.knowledge.PublisherKgService;
 import com.hiekn.china.aeronautical.model.bean.Publisher;
 import com.hiekn.china.aeronautical.model.vo.FileImport;
 import com.hiekn.china.aeronautical.model.vo.PublisherQuery;
@@ -27,7 +28,6 @@ import org.springframework.data.domain.Sort;
 import org.springframework.data.mongodb.core.query.Criteria;
 import org.springframework.data.mongodb.core.query.Query;
 import org.springframework.data.mongodb.core.query.Update;
-import org.springframework.data.util.CloseableIterator;
 import org.springframework.stereotype.Service;
 
 import java.io.File;
@@ -41,6 +41,8 @@ import java.util.Map;
 @Service("publisherService")
 public class PublisherServiceImpl implements PublisherService {
 
+    @Autowired
+    private PublisherKgService publisherKgService;
 
     @Autowired
     private PublisherRepository publisherRepository;
@@ -88,8 +90,8 @@ public class PublisherServiceImpl implements PublisherService {
 
     public Integer wordMarkError(WordMarkError wordMarkError, String collectionName) {
         Query query = Query.query(Criteria.where("_id").in(Arrays.asList(wordMarkError.getIds().split(","))));
-        Update update =Update.update("hasError",true).set("hasErrorTag."+wordMarkError.getColumn(), true);
-        WriteResult writeResult = publisherRepository.updateMulti(query,update,collectionName);
+        Update update = Update.update("hasError", true).set("hasErrorTag." + wordMarkError.getColumn(), true);
+        WriteResult writeResult = publisherRepository.updateMulti(query, update, collectionName);
         return writeResult.getN();
     }
 
@@ -113,20 +115,18 @@ public class PublisherServiceImpl implements PublisherService {
         return map;
     }
 
-    public void exportData(String collectionName, OutputStream output) {
+    public void exportData(String kgName, OutputStream output) {
         try {
             Workbook wb = new SXSSFWorkbook(100);
-            CloseableIterator<Publisher> c = publisherRepository.findAllByStream(collectionName);
+            List<Publisher> c = publisherKgService.findAll(kgName);
             int index = 1;
             Sheet sheet = wb.createSheet();
             ExportUtils.addOneRow(sheet.createRow(0), DataBeanUtils.getFieldList(Publisher.class));
-            while (c.hasNext()) {
-                Publisher item = c.next();
-                ExportUtils.addOneRow(sheet.createRow(index), DataBeanUtils.getFieldValueList(item));
+            for (Publisher publisher : c) {
+                ExportUtils.addOneRow(sheet.createRow(index), DataBeanUtils.getFieldValueList(publisher));
                 index++;
             }
             wb.write(output);
-            c.close();
             output.close();
             wb.close();
         } catch (Exception e) {

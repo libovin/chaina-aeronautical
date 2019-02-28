@@ -30,6 +30,9 @@ public class Task extends Base {
     @ApiModelProperty("规则")
     private List<Rule> taskRule;
 
+    @ApiModelProperty("kgName")
+    private String kgName;
+
     /**
      * 状态
      */

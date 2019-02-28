@@ -3,7 +3,6 @@ package com.hiekn.china.aeronautical.rest;
 import com.hiekn.boot.autoconfigure.base.model.result.RestData;
 import com.hiekn.boot.autoconfigure.base.model.result.RestResp;
 import com.hiekn.china.aeronautical.knowledge.WebsiteKgService;
-import com.hiekn.china.aeronautical.model.bean.Dataset;
 import com.hiekn.china.aeronautical.model.bean.Task;
 import com.hiekn.china.aeronautical.model.bean.Website;
 import com.hiekn.china.aeronautical.model.vo.FileImport;
@@ -22,6 +21,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 import javax.validation.Valid;
+import javax.validation.constraints.NotNull;
 import javax.ws.rs.BeanParam;
 import javax.ws.rs.Consumes;
 import javax.ws.rs.DELETE;
@@ -33,12 +33,9 @@ import javax.ws.rs.PUT;
 import javax.ws.rs.Path;
 import javax.ws.rs.PathParam;
 import javax.ws.rs.Produces;
-import javax.ws.rs.WebApplicationException;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 import javax.ws.rs.core.StreamingOutput;
-import java.io.IOException;
-import java.io.OutputStream;
 import java.util.List;
 import java.util.Map;
 
@@ -66,7 +63,7 @@ public class WebsiteRestApi {
     @POST
     @Path("{key}/list")
     public RestResp<RestData<Website>> findAll(@Valid WebsiteQuery websiteQuery,
-                                               @HeaderParam("kgName") String kgName,
+                                               @HeaderParam("kgName") @NotNull String kgName,
                                                @PathParam("key") @DefaultValue("default") String key) {
         return new RestResp<>(websiteKgService.page(kgName, websiteQuery));
     }
@@ -75,7 +72,7 @@ public class WebsiteRestApi {
     @GET
     @Path("{key}/{id}")
     public RestResp<Website> findOne(@PathParam("id") Long id,
-                                     @HeaderParam("kgName") String kgName,
+                                     @HeaderParam("kgName") @NotNull String kgName,
                                      @PathParam("key") @DefaultValue("default") String key) {
         return new RestResp<>(websiteKgService.findOne(kgName, id));
     }
@@ -84,7 +81,7 @@ public class WebsiteRestApi {
     @DELETE
     @Path("{key}/{id}")
     public RestResp delete(@PathParam("id") Long id,
-                           @HeaderParam("kgName") String kgName,
+                           @HeaderParam("kgName") @NotNull String kgName,
                            @PathParam("key") @DefaultValue("default") String key) {
         websiteKgService.delete(kgName, id);
         return new RestResp<>();
@@ -95,7 +92,7 @@ public class WebsiteRestApi {
     @Path("{key}/{id}")
     @Consumes(MediaType.APPLICATION_JSON)
     public RestResp<Website> modify(@PathParam("id") Long id,
-                                    @HeaderParam("kgName") String kgName,
+                                    @HeaderParam("kgName") @NotNull String kgName,
                                     @PathParam("key") @DefaultValue("default") String key,
                                     @Valid Website website) {
         return new RestResp<>(websiteKgService.modify(kgName, id, website));
@@ -105,7 +102,7 @@ public class WebsiteRestApi {
     @POST
     @Path("{key}/add")
     public RestResp<Website> add(@Valid Website website,
-                                 @HeaderParam("kgName") String kgName,
+                                 @HeaderParam("kgName") @NotNull String kgName,
                                  @PathParam("key") @DefaultValue("default") String key) {
         return new RestResp<>(websiteKgService.insert(kgName, website));
     }
@@ -143,7 +140,9 @@ public class WebsiteRestApi {
     @GET
     @Path("{key}/export")
     @Produces(MediaType.APPLICATION_OCTET_STREAM)
-    public Response export(@PathParam("key") @DefaultValue("default") String key) {
+    public Response export(
+            @HeaderParam("kgName") @NotNull String kgName,
+            @PathParam("key") @DefaultValue("default") String key) {
 
 //        File dir = new File("custom/hangzhou_jw");
 //        if (!dir.exists()) {
@@ -163,16 +162,10 @@ public class WebsiteRestApi {
 //                .ok(export, mt)
 //                .header("Content-disposition", "attachment;filename=x.xls")
 //                .header("Cache-Control", "no-cache").build();
-        Dataset dataset = datasetService.findFirstByTypeKey(collectionName + "_" + key);
-        StreamingOutput fileStream = new StreamingOutput() {
-            @Override
-            public void write(OutputStream output) throws IOException, WebApplicationException {
-                websiteService.exportData(collectionName + "_" + key, output);
-            }
-        };
+        StreamingOutput fileStream = output -> websiteService.exportData(kgName, output);
         return Response
                 .ok(fileStream, MediaType.APPLICATION_OCTET_STREAM)
-                .header("content-disposition", "attachment; filename = " + HttpUtils.UTF_8toISO_8859_1(dataset.getName()) + ".xlsx")
+                .header("content-disposition", "attachment; filename = " + HttpUtils.UTF_8toISO_8859_1(key) + ".xlsx")
                 .build();
     }
 
@@ -189,7 +182,7 @@ public class WebsiteRestApi {
     @ApiOperation("添加标错任务")
     public RestResp<Task> taskAdd(
             @PathParam("key") @DefaultValue("default") String key,
-            @HeaderParam("kgName") String kgName,
+            @HeaderParam("kgName") @NotNull String kgName,
             @Valid TaskAdd taskAdd) {
         taskAdd.setKey(key);
         taskAdd.setTable(collectionName);

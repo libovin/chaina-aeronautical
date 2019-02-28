@@ -1,6 +1,7 @@
 package com.hiekn.china.aeronautical.service.impl;
 
 import com.hiekn.boot.autoconfigure.base.model.result.RestData;
+import com.hiekn.china.aeronautical.knowledge.InstitutionKgService;
 import com.hiekn.china.aeronautical.model.bean.Institution;
 import com.hiekn.china.aeronautical.model.vo.FileImport;
 import com.hiekn.china.aeronautical.model.vo.InstitutionQuery;
@@ -27,7 +28,6 @@ import org.springframework.data.domain.Sort;
 import org.springframework.data.mongodb.core.query.Criteria;
 import org.springframework.data.mongodb.core.query.Query;
 import org.springframework.data.mongodb.core.query.Update;
-import org.springframework.data.util.CloseableIterator;
 import org.springframework.stereotype.Service;
 
 import java.io.File;
@@ -42,6 +42,9 @@ import java.util.Map;
 public class InstitutionServiceImpl implements InstitutionService {
 
     @Autowired
+    private InstitutionKgService institutionKgService;
+
+    @Autowired
     private InstitutionRepository institutionRepository;
 
     @Autowired
@@ -50,7 +53,7 @@ public class InstitutionServiceImpl implements InstitutionService {
     public RestData<Institution> findAll(InstitutionQuery bean, String collectionName) {
         Pageable pageable;
         Institution targe = new Institution();
-        Map<String,Object> map = QueryUtils.trastation(bean, targe);
+        Map<String, Object> map = QueryUtils.trastation(bean, targe);
         List<Sort.Order> orders = (List<Sort.Order>) map.get("sort");
         if (orders.size() > 0) {
             pageable = new PageRequest(bean.getPageNo() - 1, bean.getPageSize(), new Sort(orders));
@@ -81,14 +84,14 @@ public class InstitutionServiceImpl implements InstitutionService {
         return institutionRepository.insert(institution, collectionName);
     }
 
-    public RestData<Institution> wordStatistics(WordStatQuery wordStatQuery,String collectionName) {
-       return institutionRepository.wordStatistics(wordStatQuery,collectionName);
+    public RestData<Institution> wordStatistics(WordStatQuery wordStatQuery, String collectionName) {
+        return institutionRepository.wordStatistics(wordStatQuery, collectionName);
     }
 
     public Integer wordMarkError(WordMarkError wordMarkError, String collectionName) {
         Query query = Query.query(Criteria.where("_id").in(Arrays.asList(wordMarkError.getIds().split(","))));
-        Update update =Update.update("hasError",true).set("hasErrorTag."+wordMarkError.getColumn(), true);
-        WriteResult writeResult = institutionRepository.updateMulti(query,update,collectionName);
+        Update update = Update.update("hasError", true).set("hasErrorTag." + wordMarkError.getColumn(), true);
+        WriteResult writeResult = institutionRepository.updateMulti(query, update, collectionName);
         return writeResult.getN();
     }
 
@@ -113,20 +116,18 @@ public class InstitutionServiceImpl implements InstitutionService {
     }
 
 
-    public void exportData(String collectionName, OutputStream output) {
+    public void exportData(String kgName, OutputStream output) {
         try {
             Workbook wb = new SXSSFWorkbook(100);
-            CloseableIterator<Institution> c = institutionRepository.findAllByStream(collectionName);
+            List<Institution> c = institutionKgService.findAll(kgName);
             int index = 1;
             Sheet sheet = wb.createSheet();
             ExportUtils.addOneRow(sheet.createRow(0), DataBeanUtils.getFieldList(Institution.class));
-            while (c.hasNext()) {
-                Institution item = c.next();
-                ExportUtils.addOneRow(sheet.createRow(index), DataBeanUtils.getFieldValueList(item));
+            for (Institution institution : c) {
+                ExportUtils.addOneRow(sheet.createRow(index), DataBeanUtils.getFieldValueList(institution));
                 index++;
             }
             wb.write(output);
-            c.close();
             output.close();
             wb.close();
         } catch (Exception e) {

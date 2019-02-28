@@ -3,7 +3,6 @@ package com.hiekn.china.aeronautical.rest;
 import com.hiekn.boot.autoconfigure.base.model.result.RestData;
 import com.hiekn.boot.autoconfigure.base.model.result.RestResp;
 import com.hiekn.china.aeronautical.knowledge.PublisherKgService;
-import com.hiekn.china.aeronautical.model.bean.Dataset;
 import com.hiekn.china.aeronautical.model.bean.Publisher;
 import com.hiekn.china.aeronautical.model.bean.Task;
 import com.hiekn.china.aeronautical.model.vo.FileImport;
@@ -22,6 +21,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 import javax.validation.Valid;
+import javax.validation.constraints.NotNull;
 import javax.ws.rs.BeanParam;
 import javax.ws.rs.Consumes;
 import javax.ws.rs.DELETE;
@@ -33,12 +33,9 @@ import javax.ws.rs.PUT;
 import javax.ws.rs.Path;
 import javax.ws.rs.PathParam;
 import javax.ws.rs.Produces;
-import javax.ws.rs.WebApplicationException;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 import javax.ws.rs.core.StreamingOutput;
-import java.io.IOException;
-import java.io.OutputStream;
 import java.util.List;
 import java.util.Map;
 
@@ -65,17 +62,17 @@ public class PublisherRestApi {
     @POST
     @Path("{key}/list")
     public RestResp<RestData<Publisher>> findAll(@Valid PublisherQuery publisherQuery,
-                                                 @HeaderParam("kgName") String kgName,
+                                                 @HeaderParam("kgName") @NotNull String kgName,
                                                  @PathParam("key") @DefaultValue("default") String key) {
-        return new RestResp<>(publisherKgService.page(kgName,publisherQuery));
+        return new RestResp<>(publisherKgService.page(kgName, publisherQuery));
     }
 
     @ApiOperation("出版机构详情")
     @GET
     @Path("{key}/{id}")
     public RestResp<Publisher> findOne(@PathParam("id") Long id,
-                                       @HeaderParam("kgName") String kgName,
-                            @PathParam("key") @DefaultValue("default") String key) {
+                                       @HeaderParam("kgName") @NotNull String kgName,
+                                       @PathParam("key") @DefaultValue("default") String key) {
         return new RestResp<>(publisherKgService.findOne(kgName, id));
     }
 
@@ -83,7 +80,7 @@ public class PublisherRestApi {
     @DELETE
     @Path("{key}/{id}")
     public RestResp delete(@PathParam("id") Long id,
-                           @HeaderParam("kgName") String kgName,
+                           @HeaderParam("kgName") @NotNull String kgName,
                            @PathParam("key") @DefaultValue("default") String key) {
         publisherKgService.delete(kgName, id);
         return new RestResp<>();
@@ -94,7 +91,7 @@ public class PublisherRestApi {
     @Path("{key}/{id}")
     @Consumes(MediaType.APPLICATION_JSON)
     public RestResp<Publisher> modify(@PathParam("id") Long id,
-                                      @HeaderParam("kgName") String kgName,
+                                      @HeaderParam("kgName") @NotNull String kgName,
                                       @PathParam("key") @DefaultValue("default") String key,
                                       @Valid Publisher publisher) {
         return new RestResp<>(publisherKgService.modify(kgName, id, publisher));
@@ -104,8 +101,8 @@ public class PublisherRestApi {
     @POST
     @Path("{key}/add")
     public RestResp<Publisher> add(@Valid Publisher publisher,
-                                   @HeaderParam("kgName") String kgName,
-                        @PathParam("key") @DefaultValue("default") String key) {
+                                   @HeaderParam("kgName") @NotNull String kgName,
+                                   @PathParam("key") @DefaultValue("default") String key) {
         return new RestResp<>(publisherKgService.insert(kgName, publisher));
     }
 
@@ -113,8 +110,8 @@ public class PublisherRestApi {
     @POST
     @Path("{key}/word")
     public RestResp<RestData<Publisher>> wordStatistics(@Valid WordStatQuery wordStatQuery,
-                               @PathParam("key") @DefaultValue("default") String key) {
-        return new RestResp<>(publisherService.wordStatistics(wordStatQuery,collectionName + "_" + key));
+                                                        @PathParam("key") @DefaultValue("default") String key) {
+        return new RestResp<>(publisherService.wordStatistics(wordStatQuery, collectionName + "_" + key));
     }
 
     @ApiOperation("会议统计标错")
@@ -134,7 +131,7 @@ public class PublisherRestApi {
     public RestResp<Map<String, Object>> importData(
             @BeanParam FileImport fileImport,
             @PathParam("key") @DefaultValue("default") String key) {
-        Map<String, Object> map = publisherService.importData(fileImport,collectionName + "_" + key);
+        Map<String, Object> map = publisherService.importData(fileImport, collectionName + "_" + key);
         return new RestResp<>(map);
     }
 
@@ -142,17 +139,13 @@ public class PublisherRestApi {
     @GET
     @Path("{key}/export")
     @Produces(MediaType.APPLICATION_OCTET_STREAM)
-    public Response export(@PathParam("key") @DefaultValue("default") String key) {
-        Dataset dataset = datasetService.findFirstByTypeKey(collectionName + "_" + key);
-        StreamingOutput fileStream = new StreamingOutput() {
-            @Override
-            public void write(OutputStream output) throws IOException, WebApplicationException {
-                publisherService.exportData(collectionName + "_" + key, output);
-            }
-        };
+    public Response export(
+            @HeaderParam("kgName") @NotNull String kgName,
+            @PathParam("key") @DefaultValue("default") String key) {
+        StreamingOutput fileStream = output -> publisherService.exportData(kgName, output);
         return Response
                 .ok(fileStream, MediaType.APPLICATION_OCTET_STREAM)
-                .header("content-disposition", "attachment; filename = " + HttpUtils.UTF_8toISO_8859_1(dataset.getName()) + ".xlsx")
+                .header("content-disposition", "attachment; filename = " + HttpUtils.UTF_8toISO_8859_1(key) + ".xlsx")
                 .build();
     }
 
@@ -169,7 +162,7 @@ public class PublisherRestApi {
     @ApiOperation("添加标错任务")
     public RestResp<Task> taskAdd(
             @PathParam("key") @DefaultValue("default") String key,
-            @HeaderParam("kgName") String kgName,
+            @HeaderParam("kgName") @NotNull String kgName,
             @Valid TaskAdd taskAdd) {
         taskAdd.setKey(key);
         taskAdd.setTable(collectionName);
@@ -180,7 +173,7 @@ public class PublisherRestApi {
     @GET
     @ApiOperation("出版机构字段")
     @Path("column")
-    public RestResp getColumn(){
+    public RestResp getColumn() {
         return new RestResp<>(DataBeanUtils.getClassProperty(Publisher.class));
     }
 

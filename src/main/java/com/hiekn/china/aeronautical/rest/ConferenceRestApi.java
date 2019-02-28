@@ -4,7 +4,6 @@ import com.hiekn.boot.autoconfigure.base.model.result.RestData;
 import com.hiekn.boot.autoconfigure.base.model.result.RestResp;
 import com.hiekn.china.aeronautical.knowledge.ConferenceKgService;
 import com.hiekn.china.aeronautical.model.bean.Conference;
-import com.hiekn.china.aeronautical.model.bean.Dataset;
 import com.hiekn.china.aeronautical.model.bean.Task;
 import com.hiekn.china.aeronautical.model.vo.ConferenceQuery;
 import com.hiekn.china.aeronautical.model.vo.FileImport;
@@ -22,6 +21,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 import javax.validation.Valid;
+import javax.validation.constraints.NotNull;
 import javax.ws.rs.BeanParam;
 import javax.ws.rs.Consumes;
 import javax.ws.rs.DELETE;
@@ -33,12 +33,9 @@ import javax.ws.rs.PUT;
 import javax.ws.rs.Path;
 import javax.ws.rs.PathParam;
 import javax.ws.rs.Produces;
-import javax.ws.rs.WebApplicationException;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 import javax.ws.rs.core.StreamingOutput;
-import java.io.IOException;
-import java.io.OutputStream;
 import java.util.List;
 import java.util.Map;
 
@@ -67,9 +64,9 @@ public class ConferenceRestApi {
     @Path("{key}/list")
     public RestResp<RestData<Conference>> findAll(
             @PathParam("key") @DefaultValue("default") String key,
-            @HeaderParam("kgName") String kgName,
+            @HeaderParam("kgName") @NotNull String kgName,
             @Valid ConferenceQuery conferenceQuery) {
-        return new RestResp<>(conferenceKgService.page(kgName,conferenceQuery));
+        return new RestResp<>(conferenceKgService.page(kgName, conferenceQuery));
     }
 
     @ApiOperation("会议详情")
@@ -77,7 +74,7 @@ public class ConferenceRestApi {
     @Path("{key}/{id}")
     public RestResp<Conference> findOne(
             @PathParam("id") Long id,
-            @HeaderParam("kgName") String kgName,
+            @HeaderParam("kgName") @NotNull String kgName,
             @PathParam("key") @DefaultValue("default") String key) {
         return new RestResp<>(conferenceKgService.findOne(kgName, id));
     }
@@ -87,7 +84,7 @@ public class ConferenceRestApi {
     @Path("{key}/{id}")
     public RestResp delete(
             @PathParam("id") Long id,
-            @HeaderParam("kgName") String kgName,
+            @HeaderParam("kgName") @NotNull String kgName,
             @PathParam("key") @DefaultValue("default") String key) {
         conferenceKgService.delete(kgName, id);
         return new RestResp<>();
@@ -99,7 +96,7 @@ public class ConferenceRestApi {
     @Consumes(MediaType.APPLICATION_JSON)
     public RestResp<Conference> modify(
             @PathParam("key") @DefaultValue("default") String key,
-            @HeaderParam("kgName") String kgName,
+            @HeaderParam("kgName") @NotNull String kgName,
             @PathParam("id") Long id,
             @Valid Conference conference) {
         return new RestResp<>(conferenceKgService.modify(kgName, id, conference));
@@ -110,7 +107,7 @@ public class ConferenceRestApi {
     @Path("{key}/add")
     public RestResp<Conference> add(
             @Valid Conference conference,
-            @HeaderParam("kgName") String kgName,
+            @HeaderParam("kgName") @NotNull String kgName,
             @PathParam("key") @DefaultValue("default") String key) {
         return new RestResp<>(conferenceKgService.insert(kgName, conference));
     }
@@ -149,17 +146,13 @@ public class ConferenceRestApi {
     @GET
     @Path("{key}/export")
     @Produces(MediaType.APPLICATION_OCTET_STREAM)
-    public Response export(@PathParam("key") @DefaultValue("default") String key) {
-        Dataset dataset = datasetService.findFirstByTypeKey(collectionName + "_" + key);
-        StreamingOutput fileStream = new StreamingOutput() {
-            @Override
-            public void write(OutputStream output) throws IOException, WebApplicationException {
-                conferenceService.exportData(collectionName + "_" + key, output);
-            }
-        };
+    public Response export(
+            @HeaderParam("kgName") @NotNull String kgName,
+            @PathParam("key") @DefaultValue("default") String key) {
+        StreamingOutput fileStream = output -> conferenceService.exportData(kgName, output);
         return Response
                 .ok(fileStream, MediaType.APPLICATION_OCTET_STREAM)
-                .header("content-disposition", "attachment; filename = " + HttpUtils.UTF_8toISO_8859_1(dataset.getName()) + ".xlsx")
+                .header("content-disposition", "attachment; filename = " + HttpUtils.UTF_8toISO_8859_1(key) + ".xlsx")
                 .build();
     }
 
@@ -172,20 +165,18 @@ public class ConferenceRestApi {
         return new RestResp<>();
     }
 
-
     @POST
     @Path("{key}/task/add")
     @ApiOperation("添加标错任务")
     public RestResp<Task> taskAdd(
             @PathParam("key") @DefaultValue("default") String key,
-            @HeaderParam("kgName") String kgName,
+            @HeaderParam("kgName") @NotNull String kgName,
             @Valid TaskAdd taskAdd) {
         taskAdd.setKey(key);
         taskAdd.setTable(collectionName);
         taskAdd.setKgName(kgName);
         return new RestResp<>(taskService.add(taskAdd));
     }
-
 
     @GET
     @ApiOperation("会议字段")

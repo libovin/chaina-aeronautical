@@ -66,7 +66,6 @@ public class DataBeanUtils {
         List<String> list = new ArrayList<>();
         Field[] fields = cls.getDeclaredFields();
         for (Field field : fields) {
-
             String name = field.getName();
             list.add(name);
         }

@@ -1,5 +1,6 @@
 package com.hiekn.china.aeronautical.service.impl;
 
+import com.hiekn.china.aeronautical.knowledge.KgBaseService;
 import com.hiekn.china.aeronautical.model.base.MarkError;
 import com.hiekn.china.aeronautical.model.bean.Conference;
 import com.hiekn.china.aeronautical.model.bean.Institution;
@@ -13,8 +14,6 @@ import com.hiekn.china.aeronautical.service.TaskAsyncService;
 import com.hiekn.china.aeronautical.util.RuleUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.mongodb.core.MongoTemplate;
-import org.springframework.data.mongodb.core.query.Query;
-import org.springframework.data.util.CloseableIterator;
 import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Service;
 
@@ -29,6 +28,9 @@ import java.util.regex.Pattern;
 
 @Service("taskAsyncService")
 public class TaskAsyncServiceImpl implements TaskAsyncService {
+
+    @Autowired
+    private KgBaseService kgBaseService;
 
     @Autowired
     private MongoTemplate mongoTemplate;
@@ -54,20 +56,17 @@ public class TaskAsyncServiceImpl implements TaskAsyncService {
     private <T extends MarkError> Task runTask(Task task) {
         String table = task.getTable();
         String key = task.getKey();
-        String collectionName = table + "_" + key;
-
-        CloseableIterator<T> closeableIterator = mongoTemplate.stream(new Query(), getTableClass(table), collectionName);
-
+        String kgName = task.getKgName();
+        Class<T> tClass = getTableClass(table);
+        List<T> all = kgBaseService.findAll(kgName, table, tClass);
         long promote = 0;
         long errorCount = 0;
-        while (closeableIterator.hasNext()) {
-            T obj = closeableIterator.next();
-            if (checkSingle(obj, task.getTaskRule(), collectionName)) {
+        for (T obj : all) {
+            if (checkSingle(obj, task.getTaskRule(), kgName)) {
                 errorCount++;
             }
             promote++;
         }
-        closeableIterator.close();
         task.setPromote(promote);
         task.setErrorCount(errorCount);
         return task;
@@ -101,21 +100,27 @@ public class TaskAsyncServiceImpl implements TaskAsyncService {
         obj.setHasError(hasError);
         obj.setHasErrorTag(hasErrorMap);
         // obj.setMarkErrorResult(errorMessage);
-        mongoTemplate.save(obj, collectionName);
+        mongoTemplate.save((MarkError) obj, collectionName);
         return hasError;
     }
 
-    private Class getTableClass(String table) {
+
+    private <T extends MarkError> Class<T> getTableClass(String table) {
         if (Objects.equals("conference", table)) {
-            return Conference.class;
+            //noinspection unchecked
+            return (Class<T>) Conference.class;
         } else if (Objects.equals("institution", table)) {
-            return Institution.class;
+            //noinspection unchecked
+            return (Class<T>) Institution.class;
         } else if (Objects.equals("periodical", table)) {
-            return Periodical.class;
+            //noinspection unchecked
+            return (Class<T>) Periodical.class;
         } else if (Objects.equals("publisher", table)) {
-            return Publisher.class;
+            //noinspection unchecked
+            return (Class<T>) Publisher.class;
         } else if (Objects.equals("website", table)) {
-            return Website.class;
+            //noinspection unchecked
+            return (Class<T>) Website.class;
         }
         return null;
     }

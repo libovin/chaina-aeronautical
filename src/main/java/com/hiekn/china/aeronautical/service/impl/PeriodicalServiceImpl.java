@@ -1,6 +1,7 @@
 package com.hiekn.china.aeronautical.service.impl;
 
 import com.hiekn.boot.autoconfigure.base.model.result.RestData;
+import com.hiekn.china.aeronautical.knowledge.PeriodicalKgService;
 import com.hiekn.china.aeronautical.model.bean.Periodical;
 import com.hiekn.china.aeronautical.model.vo.FileImport;
 import com.hiekn.china.aeronautical.model.vo.PeriodicalQuery;
@@ -27,7 +28,6 @@ import org.springframework.data.domain.Sort;
 import org.springframework.data.mongodb.core.query.Criteria;
 import org.springframework.data.mongodb.core.query.Query;
 import org.springframework.data.mongodb.core.query.Update;
-import org.springframework.data.util.CloseableIterator;
 import org.springframework.stereotype.Service;
 
 import java.io.File;
@@ -41,6 +41,8 @@ import java.util.Map;
 @Service("periodicalService")
 public class PeriodicalServiceImpl implements PeriodicalService {
 
+    @Autowired
+    private PeriodicalKgService periodicalKgService;
 
     @Autowired
     private PeriodicalRepository periodicalRepository;
@@ -88,8 +90,8 @@ public class PeriodicalServiceImpl implements PeriodicalService {
 
     public Integer wordMarkError(WordMarkError wordMarkError, String collectionName) {
         Query query = Query.query(Criteria.where("_id").in(Arrays.asList(wordMarkError.getIds().split(","))));
-        Update update =Update.update("hasError",true).set("hasErrorTag."+wordMarkError.getColumn(), true);
-        WriteResult writeResult = periodicalRepository.updateMulti(query,update,collectionName);
+        Update update = Update.update("hasError", true).set("hasErrorTag." + wordMarkError.getColumn(), true);
+        WriteResult writeResult = periodicalRepository.updateMulti(query, update, collectionName);
         return writeResult.getN();
     }
 
@@ -113,20 +115,18 @@ public class PeriodicalServiceImpl implements PeriodicalService {
         return map;
     }
 
-    public void exportData(String collectionName, OutputStream output) {
+    public void exportData(String kgName, OutputStream output) {
         try {
             Workbook wb = new SXSSFWorkbook(100);
-            CloseableIterator<Periodical> c = periodicalRepository.findAllByStream(collectionName);
+            List<Periodical> c = periodicalKgService.findAll(kgName);
             int index = 1;
             Sheet sheet = wb.createSheet();
             ExportUtils.addOneRow(sheet.createRow(0), DataBeanUtils.getFieldList(Periodical.class));
-            while (c.hasNext()) {
-                Periodical item = c.next();
-                ExportUtils.addOneRow(sheet.createRow(index), DataBeanUtils.getFieldValueList(item));
+            for (Periodical periodical : c) {
+                ExportUtils.addOneRow(sheet.createRow(index), DataBeanUtils.getFieldValueList(periodical));
                 index++;
             }
             wb.write(output);
-            c.close();
             output.close();
             wb.close();
         } catch (Exception e) {

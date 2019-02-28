@@ -3,7 +3,6 @@ package com.hiekn.china.aeronautical.rest;
 import com.hiekn.boot.autoconfigure.base.model.result.RestData;
 import com.hiekn.boot.autoconfigure.base.model.result.RestResp;
 import com.hiekn.china.aeronautical.knowledge.InstitutionKgService;
-import com.hiekn.china.aeronautical.model.bean.Dataset;
 import com.hiekn.china.aeronautical.model.bean.Institution;
 import com.hiekn.china.aeronautical.model.bean.Task;
 import com.hiekn.china.aeronautical.model.vo.FileImport;
@@ -22,6 +21,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 import javax.validation.Valid;
+import javax.validation.constraints.NotNull;
 import javax.ws.rs.BeanParam;
 import javax.ws.rs.Consumes;
 import javax.ws.rs.DELETE;
@@ -33,12 +33,9 @@ import javax.ws.rs.PUT;
 import javax.ws.rs.Path;
 import javax.ws.rs.PathParam;
 import javax.ws.rs.Produces;
-import javax.ws.rs.WebApplicationException;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 import javax.ws.rs.core.StreamingOutput;
-import java.io.IOException;
-import java.io.OutputStream;
 import java.util.List;
 import java.util.Map;
 
@@ -68,7 +65,7 @@ public class InstitutionRestApi {
     @Path("{key}/list")
     public RestResp<RestData<Institution>> findAll(
             @Valid InstitutionQuery institutionQuery,
-            @HeaderParam("kgName") String kgName,
+            @HeaderParam("kgName") @NotNull String kgName,
             @PathParam("key") @DefaultValue("default") String key) {
         return new RestResp<>(institutionKgService.page(kgName, institutionQuery));
     }
@@ -78,7 +75,7 @@ public class InstitutionRestApi {
     @Path("{key}/{id}")
     public RestResp<Institution> findOne(
             @PathParam("id") Long id,
-            @HeaderParam("kgName") String kgName,
+            @HeaderParam("kgName") @NotNull String kgName,
             @PathParam("key") @DefaultValue("default") String key) {
         return new RestResp<>(institutionKgService.findOne(kgName, id));
     }
@@ -88,7 +85,7 @@ public class InstitutionRestApi {
     @Path("{key}/{id}")
     public RestResp delete(
             @PathParam("id") Long id,
-            @HeaderParam("kgName") String kgName,
+            @HeaderParam("kgName") @NotNull String kgName,
             @PathParam("key") @DefaultValue("default") String key) {
         institutionKgService.delete(kgName, id);
         return new RestResp<>();
@@ -100,7 +97,7 @@ public class InstitutionRestApi {
     @Consumes(MediaType.APPLICATION_JSON)
     public RestResp<Institution> modify(
             @PathParam("id") Long id,
-            @HeaderParam("kgName") String kgName,
+            @HeaderParam("kgName") @NotNull String kgName,
             @Valid Institution institution,
             @PathParam("key") @DefaultValue("default") String key) {
         return new RestResp<>(institutionKgService.modify(kgName, id, institution));
@@ -111,7 +108,7 @@ public class InstitutionRestApi {
     @Path("{key}/add")
     public RestResp<Institution> add(
             @Valid Institution institution,
-            @HeaderParam("kgName") String kgName,
+            @HeaderParam("kgName") @NotNull String kgName,
             @PathParam("key") @DefaultValue("default") String key) {
         return new RestResp<>(institutionKgService.insert(kgName, institution));
     }
@@ -151,17 +148,12 @@ public class InstitutionRestApi {
     @Path("{key}/export")
     @Produces(MediaType.APPLICATION_OCTET_STREAM)
     public Response export(
+            @HeaderParam("kgName") @NotNull String kgName,
             @PathParam("key") @DefaultValue("default") String key) {
-        Dataset dataset = datasetService.findFirstByTypeKey(collectionName + "_" + key);
-        StreamingOutput fileStream = new StreamingOutput() {
-            @Override
-            public void write(OutputStream output) throws IOException, WebApplicationException {
-                institutionService.exportData(collectionName + "_" + key, output);
-            }
-        };
+        StreamingOutput fileStream = output -> institutionService.exportData(kgName, output);
         return Response
                 .ok(fileStream, MediaType.APPLICATION_OCTET_STREAM)
-                .header("content-disposition", "attachment; filename = " + HttpUtils.UTF_8toISO_8859_1(dataset.getName()) + ".xlsx")
+                .header("content-disposition", "attachment; filename = " + HttpUtils.UTF_8toISO_8859_1(key) + ".xlsx")
                 .build();
     }
 
@@ -179,7 +171,7 @@ public class InstitutionRestApi {
     @ApiOperation("添加标错任务")
     public RestResp<Task> taskAdd(
             @PathParam("key") @DefaultValue("default") String key,
-            @HeaderParam("kgName") String kgName,
+            @HeaderParam("kgName") @NotNull String kgName,
             @Valid TaskAdd taskAdd) {
         taskAdd.setKey(key);
         taskAdd.setTable(collectionName);

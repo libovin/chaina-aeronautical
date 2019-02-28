@@ -3,7 +3,6 @@ package com.hiekn.china.aeronautical.rest;
 import com.hiekn.boot.autoconfigure.base.model.result.RestData;
 import com.hiekn.boot.autoconfigure.base.model.result.RestResp;
 import com.hiekn.china.aeronautical.knowledge.PeriodicalKgService;
-import com.hiekn.china.aeronautical.model.bean.Dataset;
 import com.hiekn.china.aeronautical.model.bean.Periodical;
 import com.hiekn.china.aeronautical.model.bean.Task;
 import com.hiekn.china.aeronautical.model.vo.FileImport;
@@ -22,6 +21,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 import javax.validation.Valid;
+import javax.validation.constraints.NotNull;
 import javax.ws.rs.BeanParam;
 import javax.ws.rs.Consumes;
 import javax.ws.rs.DELETE;
@@ -33,12 +33,9 @@ import javax.ws.rs.PUT;
 import javax.ws.rs.Path;
 import javax.ws.rs.PathParam;
 import javax.ws.rs.Produces;
-import javax.ws.rs.WebApplicationException;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 import javax.ws.rs.core.StreamingOutput;
-import java.io.IOException;
-import java.io.OutputStream;
 import java.util.List;
 import java.util.Map;
 
@@ -66,17 +63,17 @@ public class PeriodicalRestApi {
     @POST
     @Path("{key}/list")
     public RestResp<RestData<Periodical>> findAll(@Valid PeriodicalQuery periodicalQuery,
-                                                  @HeaderParam("kgName") String kgName,
+                                                  @HeaderParam("kgName") @NotNull String kgName,
                                                   @PathParam("key") @DefaultValue("default") String key) {
-        return new RestResp<>(periodicalKgService.page(kgName,periodicalQuery));
+        return new RestResp<>(periodicalKgService.page(kgName, periodicalQuery));
     }
 
     @ApiOperation("期刊详情")
     @GET
     @Path("{key}/{id}")
     public RestResp<Periodical> findOne(@PathParam("id") Long id,
-                                        @HeaderParam("kgName") String kgName,
-                            @PathParam("key") @DefaultValue("default") String key) {
+                                        @HeaderParam("kgName") @NotNull String kgName,
+                                        @PathParam("key") @DefaultValue("default") String key) {
         return new RestResp<>(periodicalKgService.findOne(kgName, id));
     }
 
@@ -84,7 +81,7 @@ public class PeriodicalRestApi {
     @DELETE
     @Path("{key}/{id}")
     public RestResp delete(@PathParam("id") Long id,
-                           @HeaderParam("kgName") String kgName,
+                           @HeaderParam("kgName") @NotNull String kgName,
                            @PathParam("key") @DefaultValue("default") String key) {
         periodicalKgService.delete(kgName, id);
         return new RestResp<>();
@@ -95,7 +92,7 @@ public class PeriodicalRestApi {
     @Path("{key}/{id}")
     @Consumes(MediaType.APPLICATION_JSON)
     public RestResp<Periodical> modify(@PathParam("id") Long id,
-                                       @HeaderParam("kgName") String kgName,
+                                       @HeaderParam("kgName") @NotNull String kgName,
                                        @PathParam("key") @DefaultValue("default") String key,
                                        @Valid Periodical periodical) {
         return new RestResp<>(periodicalKgService.modify(kgName, id, periodical));
@@ -105,8 +102,8 @@ public class PeriodicalRestApi {
     @POST
     @Path("{key}/add")
     public RestResp<Periodical> add(@Valid Periodical periodical,
-                                    @HeaderParam("kgName") String kgName,
-                        @PathParam("key") @DefaultValue("default") String key) {
+                                    @HeaderParam("kgName") @NotNull String kgName,
+                                    @PathParam("key") @DefaultValue("default") String key) {
         return new RestResp<>(periodicalKgService.insert(kgName, periodical));
     }
 
@@ -114,8 +111,8 @@ public class PeriodicalRestApi {
     @POST
     @Path("{key}/word")
     public RestResp<RestData<Periodical>> wordStatistics(@Valid WordStatQuery wordStatQuery,
-                               @PathParam("key") @DefaultValue("default") String key) {
-        return new RestResp<>(periodicalService.wordStatistics(wordStatQuery,collectionName + "_" + key));
+                                                         @PathParam("key") @DefaultValue("default") String key) {
+        return new RestResp<>(periodicalService.wordStatistics(wordStatQuery, collectionName + "_" + key));
     }
 
     @ApiOperation("会议统计标错")
@@ -135,7 +132,7 @@ public class PeriodicalRestApi {
     public RestResp<Map<String, Object>> importData(
             @BeanParam FileImport fileImport,
             @PathParam("key") @DefaultValue("default") String key) {
-        Map<String, Object> map = periodicalService.importData(fileImport,collectionName + "_" + key);
+        Map<String, Object> map = periodicalService.importData(fileImport, collectionName + "_" + key);
         return new RestResp<>(map);
     }
 
@@ -143,37 +140,13 @@ public class PeriodicalRestApi {
     @GET
     @Path("{key}/export")
     @Produces(MediaType.APPLICATION_OCTET_STREAM)
-    public Response export(@PathParam("key") @DefaultValue("default") String key){
-
-//        File dir = new File("custom/hangzhou_jw");
-//        if(!dir.exists()){
-//            dir.mkdirs();
-//        }
-//        File export = new File(dir.getAbsolutePath() + "/export.doc"); //默认在项目根目录下
-//        if(!export.exists()){
-//            try{
-//                export.createNewFile();
-//            }catch(IOException e){
-//                System.out.println("创建文件失败");
-//            }
-//        }
-//
-//        String mt = new MimetypesFileTypeMap().getContentType(export);
-//        return Response
-//                .ok(export, mt)
-//                .header("Content-disposition","attachment;filename=x.doc")
-//                .header("Cache-Control", "no-cache").build();
-
-        Dataset dataset = datasetService.findFirstByTypeKey(collectionName + "_" + key);
-        StreamingOutput fileStream = new StreamingOutput() {
-            @Override
-            public void write(OutputStream output) throws IOException, WebApplicationException {
-                periodicalService.exportData(collectionName + "_" + key, output);
-            }
-        };
+    public Response export(
+            @HeaderParam("kgName") @NotNull String kgName,
+            @PathParam("key") @DefaultValue("default") String key) {
+        StreamingOutput fileStream = output -> periodicalService.exportData(kgName, output);
         return Response
                 .ok(fileStream, MediaType.APPLICATION_OCTET_STREAM)
-                .header("content-disposition", "attachment; filename = " + HttpUtils.UTF_8toISO_8859_1(dataset.getName()) + ".xlsx")
+                .header("content-disposition", "attachment; filename = " + HttpUtils.UTF_8toISO_8859_1(key) + ".xlsx")
                 .build();
     }
 
@@ -181,7 +154,7 @@ public class PeriodicalRestApi {
     @POST
     @Path("{key}/check/stat")
     @Deprecated
-    public RestResp<List<Map<String, Object>>> checkStat(@PathParam("key") @DefaultValue("default") String key){
+    public RestResp<List<Map<String, Object>>> checkStat(@PathParam("key") @DefaultValue("default") String key) {
 
         return new RestResp<>();
     }
@@ -191,7 +164,7 @@ public class PeriodicalRestApi {
     @ApiOperation("添加标错任务")
     public RestResp<Task> taskAdd(
             @PathParam("key") @DefaultValue("default") String key,
-            @HeaderParam("kgName") String kgName,
+            @HeaderParam("kgName") @NotNull String kgName,
             @Valid TaskAdd taskAdd) {
         taskAdd.setKey(key);
         taskAdd.setTable(collectionName);
@@ -203,7 +176,7 @@ public class PeriodicalRestApi {
     @GET
     @ApiOperation("期刊字段")
     @Path("column")
-    public RestResp getColumn(){
+    public RestResp getColumn() {
         return new RestResp<>(DataBeanUtils.getClassProperty(Periodical.class));
     }
 

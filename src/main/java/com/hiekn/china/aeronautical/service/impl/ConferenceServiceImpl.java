@@ -1,6 +1,7 @@
 package com.hiekn.china.aeronautical.service.impl;
 
 import com.hiekn.boot.autoconfigure.base.model.result.RestData;
+import com.hiekn.china.aeronautical.knowledge.ConferenceKgService;
 import com.hiekn.china.aeronautical.model.bean.Conference;
 import com.hiekn.china.aeronautical.model.vo.ConferenceQuery;
 import com.hiekn.china.aeronautical.model.vo.FileImport;
@@ -27,7 +28,6 @@ import org.springframework.data.domain.Sort;
 import org.springframework.data.mongodb.core.query.Criteria;
 import org.springframework.data.mongodb.core.query.Query;
 import org.springframework.data.mongodb.core.query.Update;
-import org.springframework.data.util.CloseableIterator;
 import org.springframework.stereotype.Service;
 
 import java.io.File;
@@ -40,6 +40,9 @@ import java.util.Map;
 
 @Service("conferenceService")
 public class ConferenceServiceImpl implements ConferenceService {
+
+    @Autowired
+    private ConferenceKgService conferenceKgService;
 
     @Autowired
     private ConferenceRepository conferenceRepository;
@@ -87,8 +90,8 @@ public class ConferenceServiceImpl implements ConferenceService {
 
     public Integer wordMarkError(WordMarkError wordMarkError, String collectionName) {
         Query query = Query.query(Criteria.where("_id").in(Arrays.asList(wordMarkError.getIds().split(","))));
-        Update update =Update.update("hasError",true).set("hasErrorTag."+wordMarkError.getColumn(), true);
-        WriteResult writeResult = conferenceRepository.updateMulti(query,update,collectionName);
+        Update update = Update.update("hasError", true).set("hasErrorTag." + wordMarkError.getColumn(), true);
+        WriteResult writeResult = conferenceRepository.updateMulti(query, update, collectionName);
         return writeResult.getN();
     }
 
@@ -112,20 +115,18 @@ public class ConferenceServiceImpl implements ConferenceService {
         return map;
     }
 
-    public void exportData(String collectionName, OutputStream output) {
+    public void exportData(String kgName, OutputStream output) {
         try {
             Workbook wb = new SXSSFWorkbook(100);
-            CloseableIterator<Conference> c = conferenceRepository.findAllByStream(collectionName);
+            List<Conference> c = conferenceKgService.findAll(kgName);
             int index = 1;
             Sheet sheet = wb.createSheet();
             ExportUtils.addOneRow(sheet.createRow(0), DataBeanUtils.getFieldList(Conference.class));
-            while (c.hasNext()) {
-                Conference conference = c.next();
+            for (Conference conference : c) {
                 ExportUtils.addOneRow(sheet.createRow(index), DataBeanUtils.getFieldValueList(conference));
                 index++;
             }
             wb.write(output);
-            c.close();
             output.close();
             wb.close();
         } catch (Exception e) {
