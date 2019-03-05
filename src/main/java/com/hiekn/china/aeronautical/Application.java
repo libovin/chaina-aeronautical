@@ -6,8 +6,8 @@ import org.springframework.data.mongodb.config.EnableMongoAuditing;
 
 @SpringBootApplication
 @EnableMongoAuditing
-public class ChinaAeronauticalApplication {
+public class Application {
     public static void main(String[] args) {
-        SpringApplication.run(ChinaAeronauticalApplication.class, args);
+        SpringApplication.run(Application.class, args);
     }
 }

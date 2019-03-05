@@ -1,7 +1,6 @@
 package com.hiekn.china.aeronautical;
 
 import com.hiekn.china.aeronautical.knowledge.ConferenceKgService;
-import com.hiekn.china.aeronautical.knowledge.KgBaseService;
 import com.hiekn.china.aeronautical.model.bean.Conference;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -11,13 +10,10 @@ import org.springframework.test.context.junit4.SpringRunner;
 
 @RunWith(SpringRunner.class)
 @SpringBootTest
-public class ChinaAeronauticalApplicationTest {
+public class ApplicationTest {
 
     @Autowired
     private ConferenceKgService conferenceKgService;
-
-    @Autowired
-    private KgBaseService kgBaseService;
 
     private static String KG_DB_NAME = "abcd_1234_7349l1owxwqjqw3a";
 
@@ -62,6 +58,6 @@ public class ChinaAeronauticalApplicationTest {
 
     @Test
     public void s() {
-
+        System.out.println(conferenceKgService.findAll(KG_DB_NAME));
     }
 }
